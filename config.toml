@@ -1,9 +1,9 @@
 # The URL the site will be built for
-base_url = "https://eatradish.github.io/Seje2"
+base_url = "https://czisky.github.io/Blog"
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = true
 # What language to use
-default_language = "zh-tw"
+default_language = "zh-cn"
 generate_feed = true
 
 
@@ -13,7 +13,7 @@ build_search_index = false
 [markdown]
 # Whether to do syntax highlighting
 # Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
-highlight_code = false
+highlight_code = true
 
 [extra]
 # show Chinese date format instead of normal date format
@@ -27,7 +27,7 @@ seje_vertical_layout = false
 # additional custom fonts to include (must be in CSS font-family format)
 seje_custom_fonts = ""
 # whether enable darkmode. Possible values: auto, always, never
-seje_darkmode = "auto"
+seje_darkmode = "always"
 # Your site blog links
 seje_menu_links = [
     {url = "$BASE_URL/", name = "home"},
@@ -36,15 +36,15 @@ seje_menu_links = [
     {url = "$BASE_URL/atom.xml", name = "rss"},
 ]
 
-[languages.zh-tw.translations]
-title = "寫嘢"
-home = "主頁"
-archives = "歸檔"
-about = "關於"
-rss = "訂閱"
+[languages.zh-cn.translations]
+title = "id :: k -> k"
+home = "主页"
+archives = "归档"
+about = "关于"
+rss = "订阅"
 more = "查看全文"
-olderArticle = "舊文"
+olderArticle = "旧文"
 newer = "上一篇"
 older = "下一篇"
-loading = "加載中..."
+loading = "加载中..."
 

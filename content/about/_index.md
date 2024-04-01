@@ -2,19 +2,11 @@
 title = "关于"
 
 [extra]
-year = 2019
-month = 11
-day = 3
+year = 2004
+month = 1
+day = 12
 +++
 
-我在网上的常用名是 Mag Mell，以前也曾用过「清水纱季」，以前认识我的人也会叫我「萝卜」。起名字是一件麻烦的事，总是在想着「应该给她起什么名字好」，最后因为本人贫乏的想象力而不了了之。是九七后，广州人。介绍自己的话我也不知道应该怎么说，或许看看我的文章你就能知道一二，在我的会员通讯与博客中的文章之中，存在一种明显的矛盾。我想，这可能就是自嘲。
+> Non-trivial knowledge when fully understood will construct trivial forms within the brain, Any complex structure is compounded from tiny atoms. Life comes with irrationality and pain, but the knowledge I chew through and work I participate in making will last forever.
 
-我希望 Utopiosphere 博客做的事情是「让人们在生活中，重新找回自己」。我曾经在生活中迷失过。被常年累积以来的虚无、盲目、失败，加上消费主义对于我的异化，使我失明。昼夜颠倒，人魂出离。直到有一天，我看到了[这句话](https://blog.yitianshijie.net/2016/07/12/nugget-from-anthony-wong-interview-u-magazine-hk-2016/)，我突然就明白了这一切是怎么回事：
-
-> 唔好唔记得 03 年沙士期间我写咗首《穷风流》，华丽同风流，唔一定要有钱。英文有个字好有趣，叫 decadent，在颓败氛围同时势，仍然保持美态咁解。从来唔觉得华丽同富贵有关。
-
-这句话给我的感觉不只是震撼那么简单，我至今仍然记得。在此之后，我终于明白了自己现在怎么办，以后怎么办。我想，我的「怎么办」都写在了我的文章里、我的想法里。大家都说年轻人很丧，我想，如果我也能够写文章去启示别人，告诉别人，「我们不必须这么丧」或者「我们也许还有别的出路，这条出路比那些所谓的成功更加清晰、更加明朗、更加好」，我想，这就是我写这个博客的目的吧。
-
-除了本博客以外，还有[精神碎片](https://t.me/sakiblog)，欢迎来看。本博客使用的是一个名叫 Hexo 的静态博客程序和我根据 Hexo 开发的博客主题 [Seje](https://github.com/eatradish/Seje)，她的名字其实叫「寫嘢」（粵語），Seje 是她的粤语拼音，此博客主题是设计给写字的人用的，也可以用于发 Podcast，欢迎试用。
-
-另外，此博客不设评论区，若想评价请写信至 sakkiiily [at] outlook.com。欢迎切磋！另外，我正在找工作，若有意也请通过上述的地址来联系我。
+我是闲蛋，又称 `kirraObj`。不知名大专一年级在读。翻译和分享一些感兴趣的文章。喜欢毛茸茸的动物，目前我在进行我的第三段全职（创业）工作，跟认识很久的哥们做一些[有趣的事情](https://www.bilibili.com/video/BV18Q4y1J7H6)。
