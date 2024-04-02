@@ -1,5 +1,5 @@
 # The URL the site will be built for
-base_url = "https://czisky.github.io/Blog"
+base_url = "https://kirraobj.github.io/"
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = true
 # What language to use
