@@ -13,13 +13,13 @@ build_search_index = false
 [markdown]
 # Whether to do syntax highlighting
 # Theme can be customised by setting the `highlight_theme` variable to a theme supported by Zola
-highlight_code = true
+highlight_code = false
 
 [extra]
 # show Chinese date format instead of normal date format
 seje_chinese_date = true
 # show summary instead of the whole article on the index page
-seje_show_summary_only = false
+seje_show_summary_only = true
 # Google Font API mirror URLs (for China mainland users, try fonts.loli.net)
 seje_font_mirror = "fonts.googleapis.com"
 # whether use traditional Chinese style vertical layout
@@ -27,7 +27,7 @@ seje_vertical_layout = false
 # additional custom fonts to include (must be in CSS font-family format)
 seje_custom_fonts = ""
 # whether enable darkmode. Possible values: auto, always, never
-seje_darkmode = "always"
+seje_darkmode = "auto"
 # Your site blog links
 seje_menu_links = [
     {url = "$BASE_URL/", name = "home"},

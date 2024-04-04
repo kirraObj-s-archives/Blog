@@ -1,5 +1,5 @@
 +++
 template = "home.html"
 sort_by = "date"
-paginate_by = 1
+paginate_by = 3
 +++
