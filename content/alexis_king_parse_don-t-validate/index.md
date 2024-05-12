@@ -1,6 +1,6 @@
 +++
 title = "[译] 解析，而非验证"
-date = 2024-04-08T00:00:00Z
+date = 2024-05-12T00:00:00Z
 +++
 
 > [原文](https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/)由 Alexis King 发表。
