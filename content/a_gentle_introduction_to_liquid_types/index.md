@@ -14,13 +14,13 @@ Liquid Types 通过引入逻辑谓词（Logical Predicates）扩展现有的类�
 结构之外，值还具有语义属性。Liquid Types 通过逻辑谓词扩展了现有的类型系统，使我们能够指定值的语义属性。例如，Int 类型可以通过逻辑谓词来描述非零的整数：
 
 ```haskell
-{v:Int | v /= 0}
+{v : Int | v /= 0}
 ```
 
 或者用来描述自然数（Natural Numbers）：
 
 ```haskell
-{v:Int | v >= 0}
+{v : Int | v >= 0}
 ```
 
 由于 Liquid Types 能够描述值的语义，使我们可以静态地捕捉语义类型错误，例如上面阐述的除零案例。
@@ -38,7 +38,7 @@ div :: Int -> Int -> Int
 使用 Liquid Types，我们可以精炼（Refine）类型签名来描述操作符的语义属性，特别是除数不应该为零。
 
 ```haskell
-div :: Int -> {v:Int | v /= 0} -> Int
+div :: Int -> {v : Int | v /= 0} -> Int
 ```
 
 上述类型为 `div` 操作符进行了规范。如果程序通过了上述类型检查，编译器在编译时就会验证 `div` 的第二个参数是否不同于零，从而防止除零运行时异常。接下来我们看看这个验证是如何进行的。
