@@ -3,6 +3,9 @@ title = "[译] 简要介绍 Liquid Types"
 date = 2024-06-02T00:00:00Z
 +++
 
+> [原文](https://goto.ucsd.edu/~ucsdpl-blog/liquidtypes/2015/09/19/liquid-types/)由 UCSD The Programming Systems Group 发表。
+
+
 类型系统已成功用于编译时期捕捉到潜在的错误，比如我们无法用 Boolean 除以 Int。尽管如此，良好类型化（Well-Typed）的代码仍然可能出现错误，比如将 Int 除以零通常会抛出一个运行时异常。
 
 Liquid Types 通过引入逻辑谓词（Logical Predicates）扩展现有的类型系统，使我们能够指定并自动验证代码的语义属性（Semantic Properties）。
