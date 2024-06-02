@@ -98,7 +98,7 @@ nat  = 42
 
 Liquid Types 是依值类型（Dependent Types），即类型依赖于任意表达式，类似于我们在 Coq、Agda 等中看到的类型。
 
-Liquid Types 是精炼类型（Refinement Types），即在基本类型的基础上，通过逻辑谓词进一步限定的类型。这些逻辑谓词不能是任意的表达式（如依值类型），而是从一个[子语言](https://en.wikipedia.org/wiki/Sublanguage) （Sub-Language）中抽取的表达式。精化类型系统的例子包括 DML、Sage 和 F* 等。
+Liquid Types 是精炼类型（Refinement Types），即在基本类型的基础上，通过逻辑谓词进一步限定的类型。这些逻辑谓词不能是任意的表达式（如依值类型），而是从一个[子语言](https://en.wikipedia.org/wiki/Sublanguage) （Sub-Language）中抽取的表达式。精炼类型系统的例子包括 DML、Sage 和 F* 等。
 
 Liquid Types 是一种受约束的精炼类型，其中的逻辑谓词来自一个具有可判定性的子语言，即一个可以进行蕴含检查的逻辑语言。例子包括无量词理论，如整数线性算术（Linear Arithmetic over Integers）、数组理论（Theory of Arrays）和集合论（Sets Theory）等。这些理论的一个共同特点是它们允许我们通过算法来确定逻辑表达式的真值，从而实现自动化的类型验证。
 
