@@ -14,3 +14,7 @@ day = 12
 相关信息：
 - [GitHub](https://github.com/CziSKY)
 - 邮箱: k@asgard.sh
+
+我的朋友们：
+- [iceBear67](https://blog.0w0.ing/index.html)
+- [roife](https://roife.github.io/)
