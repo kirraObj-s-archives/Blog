@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://kirraobj.github.io/atom.xml">
+    
+    
+    
+        
+    
+    
+    
+    
+    
+    
+        
+    
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>[译] 为什么我们需要 LSP? - id :: k -&gt; k</title>
+    <meta charset="utf-8">
+    <meta name="title" content="[译] 为什么我们需要 LSP? - id :: k -&gt; k">
+    <meta name="description" content="">
+    <meta property="og:image:width" content="200" />
+    <meta property="og:image:height" content="200" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;kirraobj.github.io/style.css">
+    
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;kirraobj.github.io/autodarkmode.css">
+    
+    
+    <style>
+    @media screen and (min-width: 320px) {
+        body {
+            font-size: calc(16px + 2 * ((100vw - 320px) / 960));
+        }
+    }
+    </style>
+    
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap">
+    <style>body { font-family: 'Source Serif Pro', 'Source Han Serif SC', 'Noto Serif CJK SC', 'Noto Serif SC', serif }</style>
+    
+    <link rel="stylesheet" href="/foundation.min.css">
+    <script src="/highlight.min.js"></script>
+    <script defer>hljs.highlightAll();</script>
+</head>
+<body>
+    
+    <header class="header">
+        <div class="blog-title"><a href="https:&#x2F;&#x2F;kirraobj.github.io" class="logo">id :: k -&gt; k</a></div>
+        <nav class="navbar">
+    <ul class="menu">
+        
+        
+        <li class="menu-item">
+            
+            
+            
+            
+            <a href="https:&#x2F;&#x2F;kirraobj.github.io&#x2F;" class="menu-item-link">主页</a>
+            
+        </li>
+        
+        <li class="menu-item">
+            
+            
+            
+            
+            <a href="https:&#x2F;&#x2F;kirraobj.github.io&#x2F;archives" class="menu-item-link">归档</a>
+            
+        </li>
+        
+        <li class="menu-item">
+            
+            
+            
+            
+            <a href="https:&#x2F;&#x2F;kirraobj.github.io&#x2F;about" class="menu-item-link">关于</a>
+            
+        </li>
+        
+        <li class="menu-item">
+            
+            
+            
+            
+            <a href="https:&#x2F;&#x2F;kirraobj.github.io&#x2F;atom.xml" class="menu-item-link">订阅</a>
+            
+        </li>
+        
+    </ul>
+</nav>
+
+    </header>
+    
+    <main class="main">
+        
+<article class="post">
+    <div class="post-title">
+        <h1 class="title">[译] 为什么我们需要 LSP?</h1>
+    </div>
+    <div class="post-content">
+        <blockquote>
+<p>原文由 Matklad <a href="https://matklad.github.io/2022/04/25/why-lsp.html">发表</a>，Apache 2.0 与 MIT 双许可。</p>
+</blockquote>
+<p>LSP (<a href="https://microsoft.github.io/language-server-protocol/">language server protocol</a>) 如今非常流行。但为什么呢？对此有一个比较受很多人认可的解释。你可能之前见过这张图：</p>
+<p><img src="https://kirraobj.github.io/matklad-why-lsp/LSP-MxN.png" alt="LSP" /></p>
+<p>我觉得用这张图来说明 LSP 为什么会如此流行是错误的，在这篇文章中，我会解释为什么并发表我的版本。</p>
+<h2 id="yuan-shuo-ming">原说明</h2>
+<p>上图搭配的解释是这样的：</p>
+<p>这里存在 <code>M</code> 个代码编辑器 （Source-code editor）和 <code>N</code> 个语言。如果你想在某个特定的编辑器中支持某种特定的语言，你需要为此编写一个独立的插件。这样的话，你就需要 <code>M * N</code> 个插件，左图生动地展示了这一点。LSP 所做的，就是通过建立一个通用的桥梁，将工作量削减到 <code>M + N</code>，如右图所示。</p>
+<h2 id="wei-shi-yao-shi-cuo-wu-de">为什么是错误的？</h2>
+<p>问题在于，最佳的解释方式应通过图示来展现。简而言之，上图并没有按正确比例画出。有一个更好的例子来说明，如图所示 rust-analyzer 与 VSCode 是如何协同工作的：</p>
+<p><img src="https://kirraobj.github.io/matklad-why-lsp/ra-code.png" alt="ra-code" /></p>
+<p>左边的大球是 rust-analyzer —— <a href="https://en.m.wiktionary.org/wiki/language_server">语言服务器</a>（language server）。右边大小相近的球是 VSCode —— 一个代码编辑器。而中间的小球是将它们粘合在一起的代码，包含 LSP 实现。</p>
+<blockquote>
+<p>译者注：这里的语言服务器与 LSP 有所区别，简单理解语言服务器是一种专门设计来提供编程语言特定功能的独立程序。提供了像引用查询，代码补全，代码跳转等功能。与其相对的客户端即是编辑器，而 LSP 是由微软提出的一种通用协议，用于不同的编辑器与语言服务器之间的相互通信。</p>
+</blockquote>
+<p>这些代码相对于语言服务器或编辑器背后的庞大代码库来说，既绝对小也相对小。</p>
+<p>如果这个令很多人信服的解释成立，那么在 LSP 出现之前，我们就已经处在这样一个世界中：某些编辑器对特定的编程语言提供了卓越的 IDE 支持 —— 例如，IntelliJ 对 Java 的支持非常好，Emacs 在 C++ 上表现出色，Vim 则对 C# 有很好的支持。然而，我对那个时期的记忆却大相径庭。实际上，如果你想要获得合格的 IDE 支持，你基本只能选择 JetBrains 系支持的语言（IntelliJ 或 ReSharper），因为在那个时候，只有极少数编辑器能提供真正意义上的语义 IDE 支持。</p>
+<h2 id="ling-yi-chong-jie-shi">另一种解释</h2>
+<p>我认为过去 IDE 支持不足的原因与 <code>M * N</code> 太大无关，而是因为 <code>N</code> 为零，<code>M</code> 略大于零。</p>
+<p>从我相对熟悉的 <code>N</code> —— 语言服务器的数量来看，在 LSP 出现之前，实际上并没有太多的语言服务器（或类似的东西）存在。主要原因在于构建一个语言服务器太难了。</p>
+<p>语言服务器的本质复杂性相当高。众所周知，编译器的构建是复杂的，而语言服务器不仅仅是一个编译器。</p>
+<p>首先：语言服务器必须和传统编译器一样，彻底理解编程语言，能够区分编写正确和编写错误的程序。然而，对于错误的程序，传统编译器只需抛出错误信息，而语言服务器则必须尽可能地分析任何错误的程序。与传统编译器相比，在处理不完整或错误的程序方面，语言服务器面临的首个复杂挑战是它必须持续运行并尝试理解这些代码。</p>
+<p>其次：虽然可以把传统编译器看作成一个将源代码文本转换成机器代码的纯函数，但语言服务器需要处理一个用户不断进行修改的代码库。这实际上为编译器引入了时间维度，状态随时间的变化是编程中最为棘手的挑战之一。</p>
+<p>然后：传统编译器旨在最大化吞吐量，而语言服务器的目标则是尽可能减少延迟（同时不完全牺牲吞吐量）。延迟要求并不意味着需要更加努力地优化。相反，这意味着通常需要从根本上改变架构，才能拥有可接受的延迟。</p>
+<p>这就引出了关于语言服务器的一系列意外的复杂性问题。如何编写传统编译器是众所周知的，已成为常识。虽然并不是每个人都读过龙书（我自己就没完全读懂 Parsing 章节），但人们都知道该书包含了所有答案。因此，大多数现有的编译器看起来都像是典型的编译器。当编译器作者开始考虑 IDE 支持时，第一个想法往往是 「啊，IDE 在某种程度上就像是一个编译器，我们已经有了一个编译器，所以问题解决了，对吧？」。这种想法是大错特错的 —— 内部来看，IDE 与编译器有很大的不同，但直到近几年，这还并非人所共知。</p>
+<p>语言服务器是「<a href="https://www.joelonsoftware.com/2000/04/06/things-you-should-never-do-part-i/">永不重写</a>」规则的反例。大多数备受好评的语言服务器都是该语言编译器的重写或重新实现。</p>
+<p>IntelliJ 和 Eclipse 选择编写自己的编译器而不是在 IDE 内部复用 javac。为了提供足够的 C# IDE 支持，微软将其用 C++ 编写的批处理编译器重写为一个交互式的自托管编译器（项目 Roslyn）。Dart 尽管是一种从零开始的相对现代的语言，最终也有了三种实现（AOT 编译器、IDE 编译器 dart-analyzer、设备端的 JIT 编译器）。Rust 尝试了两种不同的方法：一种是对其编译器 rustc 进行逐步改进（RLS），另一种是完全从头开始构建一个新的实现，即 rust-analyzer，很明显后者更胜一筹。</p>
+<p>我知道的两个例外是 C++ 和 OCaml。有趣的是，这两种语言都需要预先声明和头文件，我认为这并不是巧合。有关详细信息，参见 <a href="https://rust-analyzer.github.io/blog/2020/07/20/three-architectures-for-responsive-ide.html">Three Architectures for a Responsive IDE</a> 一文。</p>
+<p>总之，在语言服务器方面，事情处于一种不良的均衡状态。实现语言服务器是完全可能的，但这需要一种反传统的方法，而成为一名开拓性的反传统者是困难的。</p>
+<p>在编辑器方面，我不太清楚情况如何。但是，我想要表达的是没有目前任何编辑器能够充分担任 IDE 的角色。</p>
+<p>IDE 的体验包含了一系列语义化功能支持。当然，最显著的例子是代码补全。如果有人想为 VSCode 实现定制的代码补全功能，他们需要实现 <code>CompletionItemProvider</code> 接口：</p>
+<pre data-lang="typescript" class="language-typescript "><code class="language-typescript" data-lang="typescript">interface CompletionItemProvider {
+    provideCompletionItems(
+        document: TextDocument,
+        position: Position,
+    ): CompletionItem[]
+}
+</code></pre>
+<p>这表明，在 VSCode 中，（代码）自动补全（以及其他许多 IDE 相关的功能）被视为编辑器的一等公民，拥有统一的用户界面和开发者 API。</p>
+<p>相比之下，Emacs 和 Vim 就很不一样了。它们并没有将自动补全直接作为编辑器功能的 API 接口。相反，这些编辑器提供了底层的光标和屏幕操作接口，开发者依托这些接口，各自开发出了竞争性的自动补全功能！</p>
+<p>这只是冰山一角！参数信息（parameter info）、内嵌提示（inlay hints）、导航路径（breadcrumbs）、扩展选择（extend selection）、辅助工具（assists）、符号搜索（symbol search）、引用查找（symbol search）呢？这甚至还没有概括全。</p>
+<p>简洁地总结上述内容，提供良好 IDE 支持的问题不是 <code>N * M</code> 的问题，而是双边市场失衡的问题。</p>
+<p>语言供应商不愿意开发语言服务器，原因在于这既费力又缺乏市场需求（= 没有来自其它语言的竞争压力），而且，即使某人真的开发出了语言服务器，也会发现很多编辑器根本没有准备好承载这样一个高级功能的语言服务器。</p>
+<p>在编辑器方面，因为缺少提供这些 API 的服务方，所以增加对 IDE 所需高级 API 的支持并没有太大的动力。</p>
+<h2 id="wei-shi-yao-lsp-hen-hao">为什么 LSP 很好</h2>
+<p>我认为 LSP 非常好！我不认为它是一个巨大的技术创新（将语言无关的编辑器和语言服务器分离是显而易见的）。我认为它的技术实现相当糟糕（或者说「一般」），但它使我们的世界发生了变化，从一个将缺少语言配套 IDE 视为常态的时代，转变为一个没有自动补全和跳转定义功能的语言看起来就不太专业的时代。</p>
+<p>值得注意的是，双边市场失衡问题是由微软解决的，他们既是语言（C# 和 TypeScript）的供应商，也是编辑器（VSCode 和 Visual Studio）的供应商，而且在 IDE 领域通常都输给了竞争对手（JetBrains）。尽管我可能会对 LSP 的某些技术细节发牢骚，但我绝对佩服他们在这一领域的战略视野。他们：</p>
+<ul>
+<li>利用 Web 技术上构建了一个代码编辑器。</li>
+<li>确定了网页内编辑是 JetBrains 挣扎的一个大领域（想让 Jetbrains 系 IDE 在 JavaScript 里运行几乎不可能）。</li>
+<li>构建了一种语言（！！！！）以使提供网页编辑的 IDE 支持变为可能。</li>
+<li>构建了一个架构极具前瞻性的IDE平台（敬请期待我后续详细解释 vscode.d.ts 文件为何是一个技术精湛的范例）。</li>
+<li>推出 LSP 的目的是为了免费地提升其平台在其他领域的价值，间接地将整个世界带向一个更加优秀的 IDE 环境。</li>
+<li>随着 CodeSpaces 的推出，如果我们真的转向不在本地机器上编辑、构建和运行代码的「远程优先开发」，那么它有望成为这一模式下的领头玩家。</li>
+</ul>
+<p>不过，公平地说，我仍然希望最终的赢家会是 JetBrains，他们认为 Kotlin 是任何平台的通用语言的想法 :-) 虽然微软充分利用了当今占主导地位的更糟糕的技术（TypeScript 和 Electron），JetBrains 试图从底层修正问题（Kotlin 与 Compose UI Framework）。</p>
+<h2 id="m-n-shuo-ming-de-geng-duo-fan-bo">M * N 说明的更多反驳</h2>
+<p>现在，我要深入强调一下，这真的不是 <code>M * N</code> 的问题。 :)</p>
+<p>第一：<code>M * N</code> 的论点忽视了一个事实，那就是这是一个极其容易并行处理的问题。并不需要每个语言的设计者都去为所有编辑器编写插件，也不需要每个编辑器都去特别支持所有语言。相反，一种语言应当实现一个服务器，使用某种协议通信；编辑器需要实现与语言无关的 API，以提供自动补全等功能；如果该语言和编辑器都不是非常小众，那么对这两者都感兴趣的人就会编写一些连接二者的胶水代码。以 rust-analyzer 的 VSCode 插件为例，它的代码量大概是 3200 行，NeoVim 插件是 2300 行，Emacs 插件是 1200 行。这三个插件都是由不同的人独立开发的。这正是去中心化的开源开发最精彩的地方！如果插件要支持自定义协议而不是 LSP（前提是编辑器支持高级 IDE API），我预计也许需要增加大约 2000 行代码，这仍然完全在业余爱好者的可接受范围之内。</p>
+<p>第二：对于 <code>M * N</code> 优化而言，你可能期待协议实现能够由某种机器可读形式自动生成。然而，在最新的发布之前，LSP 规范的权威来源仅仅是一个非正式的 Markdown 文件。每种语言和客户端都必须自行找出从中提取协议的方法，许多人（包括 rust-analyzer）实际上是通过手动同步变更来进行的，这导致了相当多的重复工作。</p>
+<p>第三：如果 <code>M * N</code> 真的导致了问题，那么理应只有一个 LSP 实现被所有编辑器采用。但实际情况却是，在 Emacs 中存在两种互相竞争的实现：lsp-mode 和 eglot。更令人惊讶的是，截至目前，rust-analyzer 的使用手册中甚至包括了如何将其与六种（没错，是六种）不同的 vim LSP 客户端进行集成的指南。这再次证明了开源社区的特点：总体工作量几乎不是问题，真正关键的是完成工作所需的协调努力。</p>
+<p>第四：连微软自身也未尝试从 <code>M + N</code> 的情况中获益。 VSCode 并没有采用一种通用的 LSP 实现方式；相反，它要求每种语言都有其专属的插件，这些插件各自独立实现了 LSP。</p>
+<h2 id="wo-de-hu-xu">我的呼吁</h2>
+<h3 id="suo-you-ren">所有人</h3>
+<p>向上游请求获得更好的 IDE 支持。虽然基础 IDE 支持已经普及，但我们还有很多可以提升的空间。在理想状态下，我们应该能够利用简单的 API，深入了解编辑器光标处的每一个表达式的语义细节，就像我们今天能够轻松查看编辑器缓冲区的内容一样。</p>
+<h3 id="bian-ji-qi-kai-fa-zhe">编辑器开发者</h3>
+<p>请关注 VSCode 的架构设计。虽然 Electron 带来的用户体验有待商榷，但其内部架构却蕴含着深刻的见解。编辑器 API 应该围绕着与表现形式无关的高级特性来设计。基本的 IDE 功能应当成为易于扩展的一级功能，而不是每个插件作者都需要重新发明的轮子。尤其是辅助功能、代码操作和高亮提示应该被当作核心的用户体验元素。这代表了 IDE 界的一个重大的用户体验创新，虽然这个想法已经不新鲜，但让它成为所有编辑器界面的标准配置是非常必要的。</p>
+<p>但不要把 LSP 作为一级概念。尽管这可能听起来有些出乎意料，但 VSCode 实际上并不直接处理 LSP。它仅提供了一系列接口，而不关心这些接口是如何实现的。比如在实际运行中，VSCode 中的 Rust 和 C++ 扩展并不会共用一套 LSP 实现，而是各自在内存中保留了独立的 LSP 库副本！</p>
+<p>我们还应该充分利用开源社区的力量，避免将所有 LSP 实现集中管理。应鼓励不同的开发团队独立地优化编辑器对于 Go、Rust 等语言的支持。VSCode 已经展示了一种可能的路径，通过其市场和一个去中心化、独立插件的体系。然而，理论上，如果各种编程语言都有各自的独立维护者团队，那么采用单一共享的代码仓库或源代码树的工作模式也是可行的。</p>
+<h3 id="yu-yan-fu-wu-qi-kai-fa-zhe">语言服务器开发者</h3>
+<p>你们的成就令人赞叹！各种语言的 IDE 支持正以前所未有的速度提高，虽然这只是一个长期旅程的开端。有一点需要特别强调，那就是 LSP 是访问语言语义信息的一种方式，但它并不是唯一的方式。随着时间的推移，可能会出现更加优秀的替代技术。即使在当前，LSP 的限制也已经成为了一些实用功能实现的障碍。因此，我们应该将 LSP 看作是一种数据传输格式，而不是语言处理的内核模型，并且我们迫切需要更多关于如何开发语言服务器的深入讨论 —— 目前这方面的资源还远远不够。</p>
+<p>以上。</p>
+<p>作者附言：如果您恰好从使用 rust-analyzer 中获益，请考虑赞助 <a href="https://opencollective.com/rust-analyzer">Ferrous Systems Open Source Collective</a> 以支持 rust-analyzer 的开发！</p>
+
+    </div>
+    <div class="post-meta">
+        <span class="post-time">
+        
+            
+
+
+二〇二四年四月四日
+
+        
+        </span>
+    </div>
+</article>
+
+<div class="prev_next">
+<nav id="prev_next">
+    <div class="prev">
+        
+    </div>
+    <div class="next">
+        
+    </div>
+</nav>
+</div>
+
+<div class="post-comment">
+
+
+
+
+</div>
+
+    </main>
+    
+    <p class="license"></p>
+    
+</body>
+</html>

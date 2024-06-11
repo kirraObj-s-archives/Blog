@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-cn">
+	<title></title>
+	<link href="https://kirraobj.github.io/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://kirraobj.github.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2024-06-02T00:00:00+00:00</updated>
+	<id>https://kirraobj.github.io/atom.xml</id>
+	<entry xml:lang="zh-cn">
+		<title>[译] 简要介绍 Liquid Types</title>
+		<published>2024-06-02T00:00:00+00:00</published>
+		<updated>2024-06-02T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://kirraobj.github.io/a-gentle-introduction-to-liquid-types/" type="text/html"/>
+		<id>https://kirraobj.github.io/a-gentle-introduction-to-liquid-types/</id>
+		<content type="html">&lt;blockquote&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;goto.ucsd.edu&#x2F;~ucsdpl-blog&#x2F;liquidtypes&#x2F;2015&#x2F;09&#x2F;19&#x2F;liquid-types&#x2F;&quot;&gt;原文&lt;&#x2F;a&gt;由 UCSD The Programming Systems Group 发表。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;类型系统已成功用于编译时期捕捉到潜在的错误，比如我们无法用 Boolean 除以 Int。然而，即使是没有类型错误的程序也可能出错，比如将 Int 除以零通常会抛出一个运行时异常。&lt;&#x2F;p&gt;
+&lt;p&gt;Liquid Types 通过引入逻辑谓词（Logical Predicates）扩展现有的类型系统，使我们能够指定并自动验证代码的语义属性（Semantic Properties）。&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;jie-gou-vs-yu-yi-shu-xing&quot;&gt;结构 vs. 语义属性&lt;&#x2F;h1&gt;
+&lt;p&gt;大多数类型系统依赖于其值的结构进行推理。Int 和 Boolean 具有不同的结构，通常在内部表示方式上有所不同，并且可以使用不同的操作集：即 Int 可以进行除法运算，而 Boolean 可以进行合取运算（Conjuncted）。&lt;&#x2F;p&gt;
+&lt;p&gt;结构之外，值还具有语义属性。Liquid Types 通过逻辑谓词扩展了现有的类型系统，使我们能够指定值的语义属性。例如，Int 类型可以通过逻辑谓词来描述非零的整数：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;{v : Int | v &amp;#x2F;= 0}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;或者用来描述自然数（Natural Numbers）：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;{v : Int | v &amp;gt;= 0}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;由于 Liquid Types 能够描述值的语义，使我们可以静态地捕捉语义类型错误，例如上面阐述的除零案例。&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;tong-guo-lei-xing-gui-fan-fang-zhi-chu-ling-cuo-wu&quot;&gt;通过类型规范防止除零错误&lt;&#x2F;h1&gt;
+&lt;p&gt;一个除法操作符的类型签名，给定两个 Int，得到另一个 Int。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;div :: Int -&amp;gt; Int -&amp;gt; Int
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;该类型签名有效地规定了操作符的结构。如果我们的程序可以编译，所有传给 &lt;code&gt;div&lt;&#x2F;code&gt; 的参数都是 Int，而不可能是 Boolean。&lt;&#x2F;p&gt;
+&lt;p&gt;使用 Liquid Types，我们可以精炼（Refine）类型签名来描述操作符的语义属性，特别是除数不应该为零。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;div :: Int -&amp;gt; {v : Int | v &amp;#x2F;= 0} -&amp;gt; Int
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;上述类型为 &lt;code&gt;div&lt;&#x2F;code&gt; 操作符进行了规范。如果程序通过了上述类型检查，编译器在编译时就会验证 &lt;code&gt;div&lt;&#x2F;code&gt; 的第二个参数是否不同于零，从而防止除零运行时异常。接下来我们看看这个验证是如何进行的。&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;gui-fan-yan-zheng&quot;&gt;规范验证&lt;&#x2F;h1&gt;
+&lt;p&gt;验证是给定代码和一些规范（这里是以类型签名的形式）的过程，决定代码是否满足这些规范。&lt;&#x2F;p&gt;
+&lt;p&gt;考虑 &lt;code&gt;div&lt;&#x2F;code&gt; 操作符的三种求值情况：&lt;code&gt;good&lt;&#x2F;code&gt;、&lt;code&gt;bad&lt;&#x2F;code&gt; 和 &lt;code&gt;impr (Imprecise)&lt;&#x2F;code&gt;：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;good = div 42 one  -- OK
+bad  = div 42 zero -- 类型错误
+impr = div 42 nat  -- 类型错误
+
+one  :: { v : Int | 0 &amp;lt; v  }
+one  = 1
+
+zero :: { v : Int | 0 == v }
+zero = 0
+
+nat  :: { v : Int | 0 &amp;lt;= v }
+nat  = 42
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;验证将决定只有 &lt;code&gt;good&lt;&#x2F;code&gt; 是正确求值了 &lt;code&gt;div&lt;&#x2F;code&gt;，过程如下。&lt;&#x2F;p&gt;
+&lt;p&gt;首先，它触发子类型查询。&lt;code&gt;t1&lt;&#x2F;code&gt; 是 &lt;code&gt;t2&lt;&#x2F;code&gt; 的子类型，如果每个具有 &lt;code&gt;t1&lt;&#x2F;code&gt; 类型的表达式也具有 &lt;code&gt;t2&lt;&#x2F;code&gt; 类型，则记做 &lt;code&gt;t1 &amp;lt;: t2&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;p&gt;在我们的例子中，子类型查询将检查在每次求值 &lt;code&gt;div&lt;&#x2F;code&gt; 时，除数的类型是否是规范中第二个参数的子类型，即 &lt;code&gt;{v : Int | v &#x2F;= 0}&lt;&#x2F;code&gt;。例如，&lt;code&gt;good&lt;&#x2F;code&gt; 将触发以下子类型查询：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;{v : Int | 0 &amp;lt; v} &amp;lt;: {v : Int | 0 &amp;#x2F;= v}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;然后，通过蕴涵检查（Implication checking）解决子类型查询。如果 &lt;code&gt;p ⟹ q&lt;&#x2F;code&gt; 则 &lt;code&gt;{v : Int | p } &amp;lt;: {v : Int | q }&lt;&#x2F;code&gt; 成立，例如：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;{v : Int | 0 &amp;lt; v} &amp;lt;: {v : Int | 0 &amp;#x2F;= v}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;等价于&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;∀ v. 0 &amp;lt; v ⟹ 0 ≠ v
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;因此 &lt;code&gt;good&lt;&#x2F;code&gt; 的验证成功，因为 &lt;code&gt;0 &amp;lt; v ⟹ 0 ≠ v&lt;&#x2F;code&gt;，但 &lt;code&gt;bad&lt;&#x2F;code&gt; 和 &lt;code&gt;impr&lt;&#x2F;code&gt; 的验证失败，因为 &lt;code&gt;0 = v ⟹ 0 ≠ v&lt;&#x2F;code&gt; 和 &lt;code&gt;0 ≤ v ⟹ 0 ≠ v&lt;&#x2F;code&gt; 都不成立。&lt;&#x2F;p&gt;
+&lt;p&gt;请注意，类型为你的程序提供了一种抽象。当我们定义 &lt;code&gt;nat&lt;&#x2F;code&gt; 时，我们将值 42 抽象为一个自然数，即 &lt;code&gt;nat :: {v : Int | 0 &amp;lt;= v}&lt;&#x2F;code&gt;。这对于 42 来说是一个正确的规范，但不够精确，因为它忽略了 42 不是 0 的信息，因此 42 是一个好的除数。简而言之，我们的分析并不完全，因为它可能会产生并非真正错误的类型错误。好的一面是，我们的分析是可靠的，如果它说 OK，就一定不会违反规范。&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;yan-shen-yue-du&quot;&gt;延伸阅读&lt;&#x2F;h1&gt;
+&lt;p&gt;2008 年，Rondon、Kawaguchi 和 Jhala 在 UCSD 的 ProgSys 小组&lt;a href=&quot;https:&#x2F;&#x2F;goto.ucsd.edu&#x2F;~rjhala&#x2F;liquid&#x2F;liquid_types.pdf&quot;&gt;引入了&lt;&#x2F;a&gt; Liquid Types（Logically Qualified Data Types）。从那时起，它们已被用于规范和验证 ML、C 和 Haskell。&lt;&#x2F;p&gt;
+&lt;p&gt;Liquid Types 是依值类型（Dependent Types），即类型依赖于任意表达式，类似于我们在 Coq、Agda 等中看到的类型。&lt;&#x2F;p&gt;
+&lt;p&gt;Liquid Types 是精炼类型（Refinement Types），即在基本类型的基础上，通过逻辑谓词进一步限定的类型。这些逻辑谓词不能是任意的表达式（如依值类型），而是从一个&lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Sublanguage&quot;&gt;子语言&lt;&#x2F;a&gt; （Sub-Language）中抽取的表达式。精炼类型系统的例子包括 DML、Sage 和 F* 等。&lt;&#x2F;p&gt;
+&lt;p&gt;Liquid Types 是一种受约束的精炼类型，其中的逻辑谓词来自一个具有可判定性的子语言，即一个可以进行蕴含检查的逻辑语言。例子包括无量词理论，如整数线性算术（Linear Arithmetic over Integers）、数组理论（Theory of Arrays）和集合论（Sets Theory）等。这些理论的一个共同特点是它们允许我们通过算法来确定逻辑表达式的真值，从而实现自动化的类型验证。&lt;&#x2F;p&gt;
+&lt;p&gt;由于我们使用的约束是具有可判定性的（Decidable），我们可以可靠地使用 SMT-Solvers 来进行蕴含检查。这意味着，类型检查可以简化为蕴含检查，从而使得 Liquid Types 允许可判定性的类型检查和类型推断。&lt;&#x2F;p&gt;
+&lt;p&gt;另一方面，可判定性的约束在语法上对规范语言产生了限制。使用可判定性逻辑究竟能表示哪些规范，这仍然是一个开放的问题。然而，通过使用抽象（Abstract）或有界精炼类型（Bounded Refinement Types）等技巧，我们可以在仅使用可判定性逻辑的情况下表达复杂的语义属性。&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;zong-er-yan-zhi&quot;&gt;总而言之&lt;&#x2F;h1&gt;
+&lt;p&gt;Liquid Types 提供了一种通过受约束的依值类型来规范和自动验证代码语义属性的方法。它们使用一种具有可判定性的逻辑子语言来描述这些约束条件，从而实现了一个高度自动化的类型系统，并且减少了对显式类型注释的需求。&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	<entry xml:lang="zh-cn">
+		<title>[译] 解析，而非验证</title>
+		<published>2024-05-12T00:00:00+00:00</published>
+		<updated>2024-05-12T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://kirraobj.github.io/alexis-king-parse-don-t-validate/" type="text/html"/>
+		<id>https://kirraobj.github.io/alexis-king-parse-don-t-validate/</id>
+		<content type="html">&lt;blockquote&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;lexi-lambda.github.io&#x2F;blog&#x2F;2019&#x2F;11&#x2F;05&#x2F;parse-don-t-validate&#x2F;&quot;&gt;原文&lt;&#x2F;a&gt;由 Alexis King 发表。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;一直以来，我都难以简洁明了地向他人解释什么是类型驱动设计（Type-Driven Design）。经常有人问我：「你是怎么想到这种方法的？」我发现我无法给他们一个令人满意的答案。这并不是一时的灵光一现 —— 针对其动机我有一个逐步的推理过程。而不是凭空从哪个地方蹦出来的。然而，我在向他们传达这个过程方面并不太成功。&lt;&#x2F;p&gt;
+&lt;p&gt;然而，大概一个月前我在 Twitter 上&lt;a href=&quot;https:&#x2F;&#x2F;twitter.com&#x2F;lexi_lambda&#x2F;status&#x2F;1182242561655746560&quot;&gt;反思在静态和动态类型语言中解析 JSON 的差异&lt;&#x2F;a&gt;。最终，我终于找到了我要的东西。现在我有了一个简洁的口号，它概括了类型驱动设计对我来说的意义，更棒的是，它只有三个单词：&lt;&#x2F;p&gt;
+&lt;p align=&quot;center&quot;&gt;&lt;b&gt;Parse, don’t validate.（解析，而非验证）&lt;&#x2F;b&gt;&lt;&#x2F;p&gt;
+&lt;br&gt;
+&lt;h1 id=&quot;lei-xing-qu-dong-she-ji-de-ben-zhi&quot;&gt;类型驱动设计的本质&lt;&#x2F;h1&gt;
+&lt;p&gt;好吧，我承认：除非你已经了解什么是类型驱动设计，否则这个引人注目的标语对你可能意义不大。幸运的是，这篇博客的剩余部分就是为此而写。我将详细解释我所指的含义 —— 但首先，我们需要引入一些设想。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;tan-suo-ke-neng-xing&quot;&gt;探索可能性&lt;&#x2F;h2&gt;
+&lt;p&gt;静态类型系统的一个美妙之处在于，它们可以使回答诸如「这个函数能被实现么？」这类问题变得可能，有时甚至容易。以一个极端的例子为例，考虑下面 Haskell 代码的类型签名：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;foo :: Integer -&amp;gt; Void
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;能实现 &lt;code&gt;foo&lt;&#x2F;code&gt; 函数吗？答案是不行，&lt;code&gt;Void&lt;&#x2F;code&gt; 是一个不包含任何值的类型，因此任何函数都不可能产生类型为 &lt;code&gt;Void&lt;&#x2F;code&gt; 的值。这个例子可能有点无聊，但如果我们选择一个更现实的例子，这个问题就会变得更加有趣：&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;严格来讲，在 Haskell 此处忽略了 Bottom 值。这是一种理论上可以代表任何值的构造。但并非「真实」的值（不同于其他语言中的 &lt;code&gt;null&lt;&#x2F;code&gt;），它们类似于无限循环或抛出异常的计算。通常我们避免使用它，因此请假设它不存在，这并不影响上述的讨论。但不要仅凭我的话来判断，我推荐阅读 Danielsson 的 《&lt;a href=&quot;https:&#x2F;&#x2F;www.cs.ox.ac.uk&#x2F;jeremy.gibbons&#x2F;publications&#x2F;fast+loose.pdf&quot;&gt;Fast and Loose Reasoning is Morally Correct&lt;&#x2F;a&gt;》来理解这个问题。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;head :: [a] -&amp;gt; a
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;这个&lt;a href=&quot;(https:&#x2F;&#x2F;hackage.haskell.org&#x2F;package&#x2F;hedgehog-1.4&#x2F;docs&#x2F;Hedgehog-Internal-Prelude.html#v:head)%E8%BF%94&quot;&gt;函数&lt;&#x2F;a&gt;会返回列表中的第一个元素。能实现吗？它看起来并不复杂，但如果我们尝试去实现它，编译器将不会让我们这么做：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;head :: [a] -&amp;gt; a
+head (x:_) = x
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre data-lang=&quot;text&quot; class=&quot;language-text &quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;warning: [-Wincomplete-patterns]
+    Pattern match(es) are non-exhaustive
+    In an equation for ‘head’: Patterns not matched: []
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;错误信息很有帮助地指出了我们的函数是部分函数（Partial Function），也就是说它并不适用于所有可能的输入。具体来说，这里没有定义当输入为 &lt;code&gt;[]&lt;&#x2F;code&gt; 的情况，即空列表。所以这里的报错是有道理的，因为列表为空我们就不可能返回列表的第一个元素 —— 没有元素可以返回！因此这个函数在定义上不是完全函数（Total Function）。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;jiang-bu-fen-han-shu-zhong-gou-cheng-wan-quan-han-shu&quot;&gt;将部分函数重构成完全函数&lt;&#x2F;h2&gt;
+&lt;p&gt;对于只具有动态类型语言背景的人来说，这可能看起来有些复杂。如果我们有一个列表，我们可能确实想要获取它的第一个元素。「获取列表的第一个元素」的操作在 Haskell 是可以实现的，它只是需要一些额外的仪式。有两种不同的方法可以修正 &lt;code&gt;head&lt;&#x2F;code&gt; 函数，我们将从最简单的方法开始。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;diao-zheng-qi-wang-zhi&quot;&gt;调整期望值&lt;&#x2F;h2&gt;
+&lt;p&gt;如前所属，&lt;code&gt;head&lt;&#x2F;code&gt; 是部分函数。因为如果列表为空时没有元素可以返回：我们做出了一个我们根本无法实现的承诺。幸运的是，有一个简单的解决方案可以解决这个困境：我们可以弱化我们的承诺。由于我们不能保证调用者能够从列表中得到一个元素，我们将尽可能返回一个元素，但我们保留完全不返回任何东西的权利。在 Haskell 中，我们用 &lt;code&gt;Maybe&lt;&#x2F;code&gt; 类型来表达这种可能性：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;head :: [a] -&amp;gt; Maybe a
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;这给了我们实现 &lt;code&gt;head&lt;&#x2F;code&gt; 所需的自由 —— 当我们发现无法返回 &lt;code&gt;a&lt;&#x2F;code&gt; 类型的值时，允许我们返回 &lt;code&gt;Nothing&lt;&#x2F;code&gt;。&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;head :: [a] -&amp;gt; Maybe a
+head (x:_) = Just x
+head []    = Nothing
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;问题解决了，对么？目前来说确实，但这个解决方案有一个隐形成本。&lt;&#x2F;p&gt;
+&lt;p&gt;当我们实现 &lt;code&gt;head&lt;&#x2F;code&gt; 时，返回 &lt;code&gt;Maybe&lt;&#x2F;code&gt; 无疑是最方便的。然而，当我们实际使用它时，它变得明显不那么方便了！由于 &lt;code&gt;head&lt;&#x2F;code&gt; 有可能返回 &lt;code&gt;Nothing&lt;&#x2F;code&gt;，调用者必须处理这种可能性，有时这种推锅可能会令人非常难过。为了理解为什么，考虑下面的代码：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;getConfigurationDirectories :: IO [FilePath]
+getConfigurationDirectories = do
+  configDirsString &amp;lt;- getEnv &amp;quot;CONFIG_DIRS&amp;quot;
+  let configDirsList = split &amp;#x27;,&amp;#x27; configDirsString
+  when (null configDirsList) $
+    throwIO $ userError &amp;quot;CONFIG_DIRS cannot be empty&amp;quot;
+  pure configDirsList
+
+main :: IO ()
+main = do
+  configDirs &amp;lt;- getConfigurationDirectories
+  case head configDirs of
+    Just cacheDir -&amp;gt; initializeCache cacheDir
+    Nothing -&amp;gt; error &amp;quot;should never happen; already checked configDirs is non-empty&amp;quot;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;当 &lt;code&gt;getConfigurationDirectories&lt;&#x2F;code&gt; 从环境中检索文件路径列表时，它会主动检查列表是否非空。然而，当我们在 &lt;code&gt;main&lt;&#x2F;code&gt; 函数中使用 &lt;code&gt;head&lt;&#x2F;code&gt; 来获取列表的第一个元素时，返回的 &lt;code&gt;Maybe FilePath&lt;&#x2F;code&gt; 结果仍然要求我们处理一个我们知道永远不会发生的 &lt;code&gt;Nothing&lt;&#x2F;code&gt; ，这产生了几个方面的问题：&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;这写起来很蛋疼，我们已经检查过列表是非空的，为什么还要在代码中增加一个冗余检查呢？&lt;&#x2F;li&gt;
+&lt;li&gt;它有潜在的性能成本。虽然在这个特殊的例子中，这种检查的成本微不足道，但我们可以想象在一个更复杂的场景中，这些冗余检查可能会累积，比如在一个紧密的循环中。&lt;&#x2F;li&gt;
+&lt;li&gt;最糟糕的是，这段代码有一个潜在的错误！如果 &lt;code&gt;getConfigurationDirectories&lt;&#x2F;code&gt; 被修改为不再检查列表是否为空，无论是有意还是无意的，程序员可能忘了要同步更新 &lt;code&gt;main&lt;&#x2F;code&gt; 函数，瞬间「不可能」的错误不仅可能发生，而且很可能发生。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;这种冗余检查的需求实际上迫使我们在类型系统中留下了一个漏洞。如果我们能编译期证明 &lt;code&gt;Nothing&lt;&#x2F;code&gt; 的情况是不可能发生的，那么一旦 &lt;code&gt;getConfigurationDirectories&lt;&#x2F;code&gt; 的修改导致其不再检查列表是否为空，这样的变更将会使得之前的证明失效，并触发一个编译时错误。然而，根据目前的编写方式，我们不得不依赖测试套件（Test Suite）或手动检查来发现这个错误。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;qian-zhan-xing-she-ji&quot;&gt;前瞻性设计&lt;&#x2F;h2&gt;
+&lt;p&gt;在前面的部分中，我们尝试修改 &lt;code&gt;head&lt;&#x2F;code&gt; 函数的实现，但仍有不足之处。我们希望这个函数能更加智能：如果我们已经验证过列表非空，&lt;code&gt;head&lt;&#x2F;code&gt; 应该能直接返回列表的第一个元素，而不需要我们处理我们已知不可能发生的情况。那么，我们该如何做呢？&lt;&#x2F;p&gt;
+&lt;p&gt;让我们再次回顾一下 &lt;code&gt;head&lt;&#x2F;code&gt; 函数的原始（部分函数版本）类型签名：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;head :: [a] -&amp;gt; a
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;上面已经说明，我们可以通过弱化返回类型中的承诺，将偏类型签名重构成全类型签名。然而，既然我们不想这么做，那么就只剩下一个可以改变的东西了：传入的参数类型（在本例中是 &lt;code&gt;[a]&lt;&#x2F;code&gt; ）。与其削弱返回类型，我们可以加强参数类型，从一开始就消除在空列表上调用 &lt;code&gt;head&lt;&#x2F;code&gt; 的可能性。&lt;&#x2F;p&gt;
+&lt;p&gt;为此，我们需要一个代表非空列表的类型。幸运的是 &lt;code&gt;Data.List.NonEmpty&lt;&#x2F;code&gt; 中已有的 &lt;code&gt;NonEmpty&lt;&#x2F;code&gt; 类型正好符合这一需求。它的定义如下：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;data NonEmpty a = a :| [a]
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;注意，&lt;code&gt;NonEmpty a&lt;&#x2F;code&gt; 实际上只是一个元组（Tuple），包含一个元素 &lt;code&gt;a&lt;&#x2F;code&gt; 和一个可能为空的列表 &lt;code&gt;[a]&lt;&#x2F;code&gt;。这种设计巧妙地模拟了一个非空列表，通过将列表的第一个元素与列表的尾部分开存储：即使后面的 &lt;code&gt;[a]&lt;&#x2F;code&gt; 里面是空的，前面的元素 &lt;code&gt;a&lt;&#x2F;code&gt; 必须始终存在。这使得 &lt;code&gt;head&lt;&#x2F;code&gt; 的实现变得非常简单。&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;在标准库里 &lt;code&gt;Data.List.NonEmpty&lt;&#x2F;code&gt; 已经提供了一个相同类型签名的 &lt;code&gt;head&lt;&#x2F;code&gt; 函数，但为了便于说明，我们将自己重新实现它。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;head :: NonEmpty a -&amp;gt; a
+head (x:|_) = x
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;与之前不同的是没有报错，GHC 对于我们的实现没有意见 —— 证明我们的实现是完全函数，我们可以沿用新的实现更新之前的例子：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;getConfigurationDirectories :: IO (NonEmpty FilePath)
+getConfigurationDirectories = do
+  configDirsString &amp;lt;- getEnv &amp;quot;CONFIG_DIRS&amp;quot;
+  let configDirsList = split &amp;#x27;,&amp;#x27; configDirsString
+  case nonEmpty configDirsList of
+    Just nonEmptyConfigDirsList -&amp;gt; pure nonEmptyConfigDirsList
+    Nothing -&amp;gt; throwIO $ userError &amp;quot;CONFIG_DIRS cannot be empty&amp;quot;
+
+main :: IO ()
+main = do
+  configDirs &amp;lt;- getConfigurationDirectories
+  initializeCache (head configDirs)
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;注意 &lt;code&gt;main&lt;&#x2F;code&gt; 中的冗余检查已完全消失，取而代之的是，我们在 &lt;code&gt;getConfigurationDirectories&lt;&#x2F;code&gt; 中只进行一次检查。它使用 &lt;code&gt;Data.List.NonEmpty&lt;&#x2F;code&gt; 中的 &lt;code&gt;nonEmpty&lt;&#x2F;code&gt; 函数从 &lt;code&gt;[a]&lt;&#x2F;code&gt; 构造出一个 &lt;code&gt;NonEmpty a&lt;&#x2F;code&gt; ，其类型如下：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;nonEmpty :: [a] -&amp;gt; Maybe (NonEmpty a)
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;这里的 &lt;code&gt;Maybe&lt;&#x2F;code&gt; 仍然存在，但这次我们在程序的很早阶段就处理了 &lt;code&gt;Nothing&lt;&#x2F;code&gt;：即在我们原本进行输入验证的地方。一旦通过了这个检查，我们现在拥有一个 &lt;code&gt;NonEmpty FilePath&lt;&#x2F;code&gt; 类型的值，它在类型系统中保留了列表确实非空的信息。换句话说，你可以将 &lt;code&gt;NonEmpty a&lt;&#x2F;code&gt; 类型的值视为 &lt;code&gt;[a]&lt;&#x2F;code&gt; 类型的值，附加了一个这个列表绝不可能为空的「证明」。&lt;&#x2F;p&gt;
+&lt;p&gt;通过加强参数类型而不是削弱返回类型，我们完全消除了上一节中的所有问题：&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;代码没有冗余检查，因此不会有任何额外的性能开销。&lt;&#x2F;li&gt;
+&lt;li&gt;重要的，如果 &lt;code&gt;getConfigurationDirectories&lt;&#x2F;code&gt; 函数改变不再检查列表是否非空，其返回类型也必须改变。因此 &lt;code&gt;main&lt;&#x2F;code&gt; 函数将无法通过类型检查，这在我们实际运行程序之前就提醒了我们这个问题！&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;更妙的是，通过将 &lt;code&gt;head&lt;&#x2F;code&gt; 函数与 &lt;code&gt;nonEmpty&lt;&#x2F;code&gt; 函数组合使用，我们可以轻松地复原先前提到的 &lt;code&gt;head&lt;&#x2F;code&gt; 函数的完全函数版本。（它们具有相同的类型签名）&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;head&amp;#x27; :: [a] -&amp;gt; Maybe a
+head&amp;#x27; = fmap head . nonEmpty
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;注意这里没办法逆向，即不能从旧版的 &lt;code&gt;head&lt;&#x2F;code&gt; 函数衍生出新版的 &lt;code&gt;head&lt;&#x2F;code&gt; 函数。总的来说，第二种方法在各个方面都表现更加优越。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;jie-xi-de-li-liang&quot;&gt;解析的力量&lt;&#x2F;h2&gt;
+&lt;p&gt;您可能想知道上述例子与本博客文章标题有什么关系。毕竟，我们只是探讨了两种验证列表非空的不同方法 —— 并没有看到任何解析。这种解释并没有错，但我想提出另一种观点：在我看来验证（Vaildate）与解析（Parse）之间的区别几乎完全在于信息如何被保存。考虑下面两个函数：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;validateNonEmpty :: [a] -&amp;gt; IO ()
+validateNonEmpty (_:_) = pure ()
+validateNonEmpty [] = throwIO $ userError &amp;quot;list cannot be empty&amp;quot;
+
+parseNonEmpty :: [a] -&amp;gt; IO (NonEmpty a)
+parseNonEmpty (x:xs) = pure (x:|xs)
+parseNonEmpty [] = throwIO $ userError &amp;quot;list cannot be empty&amp;quot;
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;这两个函数几乎相同：它们检查提供的列表是否为空，如果为空，则中断程序并显示错误消息。然而，它们之间有一个重要的区别：&lt;code&gt;validateNonEmpty&lt;&#x2F;code&gt; 始终返回 &lt;code&gt;()&lt;&#x2F;code&gt;，一个不携带任何信息的类型。而 &lt;code&gt;parseNonEmpty&lt;&#x2F;code&gt; 返回 &lt;code&gt;NonEmpty a&lt;&#x2F;code&gt;，这是基于输入类型 &lt;code&gt;[a]&lt;&#x2F;code&gt; 的一种改进，它在类型系统中保留了列表非空的信息。这两个函数检查的是同一件事，但 &lt;code&gt;parseNonEmpty&lt;&#x2F;code&gt; 允许调用者查看解析结果，而 &lt;code&gt;validateNonEmpty&lt;&#x2F;code&gt; 则把它丢了。&lt;&#x2F;p&gt;
+&lt;p&gt;思考一下：什么是解析器（Parser）？实际上，解析器仅是一种函数，它处理结构较松散的输入，并输出结构更丰富的结果。由于其本质，解析器是一个部分函数 —— 即其定义域中的某些值在值域中无对应值，因此所有解析器必须具备处理失败的能力。虽然解析器常常处理的是文本数据，但这并非必然要求，例如 &lt;code&gt;parseNonEmpty&lt;&#x2F;code&gt; 就是一个极好的例证：它将普通列表解析成非空列表，一旦发现列表为空，则通过抛出错误信息终止程序，从而表明失败。&lt;&#x2F;p&gt;
+&lt;p&gt;在这种灵活的定义下，解析器是一个非常强大的工具：它们允许在程序与外部世界的边界上提前进行输入检查，一旦完成这些检查，就不再需要再次检查！Haskellers 很清楚这种力量，他们经常在不同地方使用解析器：&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;hackage.haskell.org&#x2F;package&#x2F;aeson&quot;&gt;aeson&lt;&#x2F;a&gt; 库提供了一个 Parser 类型，可用于将 JSON 数据解析为领域类型（Domain Types）。&lt;&#x2F;li&gt;
+&lt;li&gt;同样，&lt;a href=&quot;https:&#x2F;&#x2F;hackage.haskell.org&#x2F;package&#x2F;optparse-applicative&quot;&gt;optparse-applicative&lt;&#x2F;a&gt; 也提供了一套用于解析命令行参数的语法分析组合子（Parser Combinator）。&lt;&#x2F;li&gt;
+&lt;li&gt;数据库的库（如 &lt;a href=&quot;https:&#x2F;&#x2F;hackage.haskell.org&#x2F;package&#x2F;persistent&quot;&gt;persistent&lt;&#x2F;a&gt; 和 &lt;a href=&quot;https:&#x2F;&#x2F;hackage.haskell.org&#x2F;package&#x2F;postgresql-simple&quot;&gt;postgresql-simple&lt;&#x2F;a&gt;）配备了一种机制，用于解析存储在外部数据存储中的值。&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;hackage.haskell.org&#x2F;package&#x2F;servant&quot;&gt;servant&lt;&#x2F;a&gt; 生态系统围绕从路径组件、查询参数、HTTP 头部等解析 Haskell 数据类型构建而成。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;这些库的共同点是，它们位于您 Haskell 应用程序与外部世界之间的界限上。外部世界不是用积类型（Product Types）以及和类型（Sum Types）进行数据交换，而是用字节流进行数据传输，因此不得不进行一些解析。在对数据进行操作之前先进行解析，可以在很大程度上避免许多类型的错误，其中一些错误甚至可能涉及安全漏洞。&lt;&#x2F;p&gt;
+&lt;p&gt;这种预先解析所有内容的方法有一个缺点，那就是有时候需要在实际使用这些值很久之前就对它们进行解析。在动态类型语言中，保持解析与处理逻辑同步可能有些困难，除非有广泛的测试覆盖，而这些测试往往维护起来非常繁琐。然而，在静态类型系统中，这个问题变得非常简单，正如上面的 &lt;code&gt;NonEmpty&lt;&#x2F;code&gt; 示例所示：如果解析和处理逻辑不同步，程序甚至无法通过编译。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;yan-zheng-de-feng-xian&quot;&gt;验证的风险&lt;&#x2F;h2&gt;
+&lt;p&gt;希望您至此已对解析优于验证的观点有所认同，但您可能还有些疑虑。如果类型系统最终还是会强制您进行必要的检查，验证真的有那么糟糕吗？也许抛出错误会不太好，但多做一些重复检查感觉也没什么大不了？&lt;&#x2F;p&gt;
+&lt;p&gt;遗憾的是，事情并不那么简单。临时性的验证会导致一种&lt;a href=&quot;https:&#x2F;&#x2F;langsec.org&#x2F;&quot;&gt;编程语言理论安全领域&lt;&#x2F;a&gt;所称的「Shotgun Parsing」现象。在 2016 年的论文《&lt;a href=&quot;http:&#x2F;&#x2F;langsec.org&#x2F;papers&#x2F;langsec-cwes-secdev2016.pdf&quot;&gt;The Seven Turrets of Babel: A Taxonomy of LangSec Errors and How to Expunge Them&lt;&#x2F;a&gt;》中，作者提供了以下定义：&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Shotgun Parsing 是一种编程负面模式，其特点是将解析和输入验证代码与业务处理代码混杂在一起，对输入进行大量的检查，希望借此捕捉到所有「坏情况」，而这种做法缺乏系统的理论支持。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;他们接着解释了这种技术固有的问题：&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Shotgun Parsing 必然剥夺程序拒绝无效输入而非处理它的能力。在输入流中较晚发现的错误将导致一部分无效输入已被处理，其后果是程序状态难以准确预测。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;说人话即是：一个没有从最开始就解析其所有输入的程序，有可能在处理一部分有效输入时，发现另一部分输入无效，突然需要回滚它已经执行的任何修改以维持一致性。有时这是可能的，比如在 RDBMS 中回滚事务 —— 但通常来说不是很行。&lt;&#x2F;p&gt;
+&lt;p&gt;Shotgun Parsing 与验证之间的关系可能并不立即显而易见 —— 毕竟，如果您一开始就完成了所有验证，您就减轻了 Shotgun Parsing 的风险。问题在于，基于验证的方法使得极其困难或不可能确定是否事前真的进行了全部验证，或者某些所谓的「不可能」情况可能实际发生。整个程序必须假设在任何地方抛出异常不仅是可能的，而且是经常必要的。&lt;&#x2F;p&gt;
+&lt;p&gt;解析通过将程序划分为两个阶段 —— 解析和执行来避免前述问题。在此模式中，无效输入引起的失败只会在第一阶段出现。与此相比，执行阶段出现问题的可能性较小，相对来说可以更细致地处理。&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;zai-shi-jian-zhong-ying-yong&quot;&gt;在实践中应用&lt;&#x2F;h1&gt;
+&lt;p&gt;迄今为止，这篇博文有点像是一场推销演讲。「亲爱的读者，你应该进行解析！」如果我做得不错的话，至少有部分读者会被说服。然而，即使你理解了「是什么」和「为什么」，你可能对「怎么做」还不是特别有信心。&lt;&#x2F;p&gt;
+&lt;p&gt;我的建议是：关注数据类型。&lt;&#x2F;p&gt;
+&lt;p&gt;假设你正在编写一个函数，这个函数接受一个代表键值对的元组列表，突然间你意识到如果列表中有重复的键应该怎么办。一个解决方案是编写一个函数，断言（Assert）列表中没有任何重复项：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;checkNoDuplicateKeys :: (MonadError AppError m, Eq k) =&amp;gt; [(k, v)] -&amp;gt; m ()
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;然而，这种检查是脆弱的：它非常容易被忘记。由于它的返回值未被使用，这个检查可以随时被省略，而依赖它的代码仍然会通过类型检查。一个更好的解决方案是选择一种在构造时就不允许重复键的数据结构，如 &lt;code&gt;Map&lt;&#x2F;code&gt;。调整你的函数类型签名，使其接受一个 &lt;code&gt;Map&lt;&#x2F;code&gt; 而不是一个元组列表，并照常实现它。&lt;&#x2F;p&gt;
+&lt;p&gt;一旦你做了这些，你的新函数的调用位置很可能会因为类型检查失败，因为它仍然被传递了一个元组列表。如果调用者是通过其中一个参数获得这个值的，或者是从其他某个函数的结果中接收到这个值，你可以继续将类型从列表更新为 &lt;code&gt;Map&lt;&#x2F;code&gt;，一直向上追溯调用链。最终，你要么会到达值被创建的位置，要么会找到一个实际上应该允许重复的地方。在那时，你可以插入一个调用到修改版的 &lt;code&gt;checkNoDuplicateKeys&lt;&#x2F;code&gt;：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;haskell&quot; class=&quot;language-haskell &quot;&gt;&lt;code class=&quot;language-haskell&quot; data-lang=&quot;haskell&quot;&gt;checkNoDuplicateKeys :: (MonadError AppError m, Eq k) =&amp;gt; [(k, v)] -&amp;gt; m (Map k v)
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;现在这个检查不能被省略，因为它的结果对程序的继续进行实际上是必需的。&lt;&#x2F;p&gt;
+&lt;p&gt;这个假设的情景强调了两个简单的想法：&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;使用一种数据结构来确保无法表示非法状态。尽可能使用最精确的数据结构来建模你的数据。如果你当前使用的实现难以排除某种可能性，考虑使用可以更容易表达你关心的属性的其他实现。不要害怕重构。&lt;&#x2F;li&gt;
+&lt;li&gt;在设计和编程过程中，应该尽可能地将数据的校验和验证的责任放在系统或代码结构向调用链的上层推，但也不能过分。尽快让你的数据转变为你需要的最精确的表现形式。理想情况下，这个过程应该在你的系统的边界处进行，在任何对数据的操作之前就完成。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;有时，在解析用户输入之前进行某种授权是必要的，以避免拒绝服务攻击，但这是可以的：授权应该只涉及较小的范围，并且不应对系统的状态造成任何重大修改。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;如果某个特定的逻辑分支最终需要更精确的数据表现形式，一旦选择了该分支，就尽早将数据解析为更精确的表现形式。明智地使用和类型，让你的数据类型能够反映并适应控制流。&lt;&#x2F;p&gt;
+&lt;p&gt;换言之，应当根据你期望的数据表现形式编写函数，而不仅仅是依赖于已有的数据形式。因此，设计过程转化为一种缩小差异的努力，通常是从两端同时着手，直至在某个中点汇合。在设计过程中，不要害怕迭代调整部分设计，因为在重构过程中，你可能会学到新的东西。&lt;&#x2F;p&gt;
+&lt;p&gt;下面是一些额外的建议，排列顺序不分前后：&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;让你的数据类型（Datatypes）控制你的代码，不要让你的代码控制你的数据类型。避免因为当前正在编写的函数需要而随意在 Record 中添加 Bool 的诱惑。不要害怕重构代码以使用正确的数据表示 —— 类型系统将确保你涵盖了所有需要更改的地方，并且这样做很可能会在之后为你避免头痛的问题。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;对返回 &lt;code&gt;m ()&lt;&#x2F;code&gt; 的函数持怀疑态度。有时这些确实是必需的，因为它们可能执行一个没有有意义结果的命令式效果（Imperative Effect），但如果该效果的主要目的是抛出异常，那么可能有更好的方法。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;不要害怕进行多次数据解析。避免 Shotgun Parsing 只是意味着在数据完全解析之前不应该处理输入数据，并不意味着你不能使用部分输入数据来决定如何解析其他输入数据。许多有用的解析器都是上下文敏感的。&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;避免数据的非规范化表述（Denormalized Representations），尤其是在数据可变的情况下。在多处重复相同的数据会轻易地造成一种非法状态：数据不同步。应当努力追求单一的真实数据源。&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;保持数据的非规范化表示在抽象界限之内。如果非规范化是绝对必要的，那么应使用封装技术，确保一个小而可信的模块独立负责维护这些表示的同步性。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;始终发挥你的判断力。通常无需仅为了解决一个「不可能」出现的错误而重构整个应用程序 —— 只需要像对待有害物质一样小心处理这些情况，采取适当的防护措施。如果其他所有方法都不奏效，至少应添加注释来记录这些不变量，方便之后可能需要修改代码的人员查阅。&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h1 id=&quot;hui-gu-fan-si-he-yan-shen-yue-du&quot;&gt;回顾、反思和延伸阅读&lt;&#x2F;h1&gt;
+&lt;p&gt;这就是全部了。希望这篇博客文章能证明，要充分利用 Haskell 类型系统并不需要拥有 PhD 学位，甚至也不需要使用 GHC 最新最好最炫酷的语言扩展 —— 尽管它们有时确实有帮助。有时候，充分利用 Haskell 的最大障碍仅仅是了解有哪些可用的选项，不幸的是，Haskell 社区过小的一个缺点是缺乏记录，导致它们只成为了属于小团体的设计模式和技术资源。&lt;&#x2F;p&gt;
+&lt;p&gt;这篇博客中的所有想法都不是新的。事实上，核心理念 —— 「编写完全函数」在概念上相当简单。尽管如此，我发现要传达我编写 Haskell 代码的方式的具体可行的细节非常有挑战性。很容易花很多时间讨论抽象概念 —— 其中许多非常有价值！而没有传达关于其过程的任何有用信息。我希望这是朝着这个方向迈出的一小步。&lt;&#x2F;p&gt;
+&lt;p&gt;遗憾的是，关于这个主题，我不知道太多延伸阅读资源，但我确实知道一个：我推荐 Matt Parson 的《&lt;a href=&quot;https:&#x2F;&#x2F;www.parsonsmatt.org&#x2F;2017&#x2F;10&#x2F;11&#x2F;type_safety_back_and_forth.html&quot;&gt;Type Safety Back and Forth&lt;&#x2F;a&gt;》。如果你想从另一个通俗易懂的角度了解这些观点，我强烈推荐阅读它。如果你想深入研究，我还可以推荐 Matt Noonan 于 2018 年发表的论文《&lt;a href=&quot;https:&#x2F;&#x2F;kataskeue.com&#x2F;gdp.pdf&quot;&gt;Ghosts of Departed Proofs&lt;&#x2F;a&gt;》，其中概述了一些在类型系统中捕获比我这里描述的更复杂不变式的技术。&lt;&#x2F;p&gt;
+&lt;p&gt;作为结束语，我想说，在这篇博客中描述的那种重构并不总是容易的。我给出的例子很简单，但现实例子通常远非如此简单。即使对于那些在类型驱动设计中有经验的人来说，要在类型系统中捕获某些不变量也可能是真正困难的，所以如果你不能像你希望的那样解决问题，不要认为这是你个人的失败！将这篇博客文章中的原则视为应该追求的理想，而不是必须满足的严格要求。重要的是尝试。&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	<entry xml:lang="zh-cn">
+		<title>[译] 为什么我们需要 LSP?</title>
+		<published>2024-04-04T00:00:00+00:00</published>
+		<updated>2024-04-04T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://kirraobj.github.io/matklad-why-lsp/" type="text/html"/>
+		<id>https://kirraobj.github.io/matklad-why-lsp/</id>
+		<content type="html">&lt;blockquote&gt;
+&lt;p&gt;原文由 Matklad &lt;a href=&quot;https:&#x2F;&#x2F;matklad.github.io&#x2F;2022&#x2F;04&#x2F;25&#x2F;why-lsp.html&quot;&gt;发表&lt;&#x2F;a&gt;，Apache 2.0 与 MIT 双许可。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;LSP (&lt;a href=&quot;https:&#x2F;&#x2F;microsoft.github.io&#x2F;language-server-protocol&#x2F;&quot;&gt;language server protocol&lt;&#x2F;a&gt;) 如今非常流行。但为什么呢？对此有一个比较受很多人认可的解释。你可能之前见过这张图：&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;kirraobj.github.io&#x2F;matklad-why-lsp&#x2F;LSP-MxN.png&quot; alt=&quot;LSP&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;我觉得用这张图来说明 LSP 为什么会如此流行是错误的，在这篇文章中，我会解释为什么并发表我的版本。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;yuan-shuo-ming&quot;&gt;原说明&lt;&#x2F;h2&gt;
+&lt;p&gt;上图搭配的解释是这样的：&lt;&#x2F;p&gt;
+&lt;p&gt;这里存在 &lt;code&gt;M&lt;&#x2F;code&gt; 个代码编辑器 （Source-code editor）和 &lt;code&gt;N&lt;&#x2F;code&gt; 个语言。如果你想在某个特定的编辑器中支持某种特定的语言，你需要为此编写一个独立的插件。这样的话，你就需要 &lt;code&gt;M * N&lt;&#x2F;code&gt; 个插件，左图生动地展示了这一点。LSP 所做的，就是通过建立一个通用的桥梁，将工作量削减到 &lt;code&gt;M + N&lt;&#x2F;code&gt;，如右图所示。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;wei-shi-yao-shi-cuo-wu-de&quot;&gt;为什么是错误的？&lt;&#x2F;h2&gt;
+&lt;p&gt;问题在于，最佳的解释方式应通过图示来展现。简而言之，上图并没有按正确比例画出。有一个更好的例子来说明，如图所示 rust-analyzer 与 VSCode 是如何协同工作的：&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;kirraobj.github.io&#x2F;matklad-why-lsp&#x2F;ra-code.png&quot; alt=&quot;ra-code&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;左边的大球是 rust-analyzer —— &lt;a href=&quot;https:&#x2F;&#x2F;en.m.wiktionary.org&#x2F;wiki&#x2F;language_server&quot;&gt;语言服务器&lt;&#x2F;a&gt;（language server）。右边大小相近的球是 VSCode —— 一个代码编辑器。而中间的小球是将它们粘合在一起的代码，包含 LSP 实现。&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;译者注：这里的语言服务器与 LSP 有所区别，简单理解语言服务器是一种专门设计来提供编程语言特定功能的独立程序。提供了像引用查询，代码补全，代码跳转等功能。与其相对的客户端即是编辑器，而 LSP 是由微软提出的一种通用协议，用于不同的编辑器与语言服务器之间的相互通信。&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;这些代码相对于语言服务器或编辑器背后的庞大代码库来说，既绝对小也相对小。&lt;&#x2F;p&gt;
+&lt;p&gt;如果这个令很多人信服的解释成立，那么在 LSP 出现之前，我们就已经处在这样一个世界中：某些编辑器对特定的编程语言提供了卓越的 IDE 支持 —— 例如，IntelliJ 对 Java 的支持非常好，Emacs 在 C++ 上表现出色，Vim 则对 C# 有很好的支持。然而，我对那个时期的记忆却大相径庭。实际上，如果你想要获得合格的 IDE 支持，你基本只能选择 JetBrains 系支持的语言（IntelliJ 或 ReSharper），因为在那个时候，只有极少数编辑器能提供真正意义上的语义 IDE 支持。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;ling-yi-chong-jie-shi&quot;&gt;另一种解释&lt;&#x2F;h2&gt;
+&lt;p&gt;我认为过去 IDE 支持不足的原因与 &lt;code&gt;M * N&lt;&#x2F;code&gt; 太大无关，而是因为 &lt;code&gt;N&lt;&#x2F;code&gt; 为零，&lt;code&gt;M&lt;&#x2F;code&gt; 略大于零。&lt;&#x2F;p&gt;
+&lt;p&gt;从我相对熟悉的 &lt;code&gt;N&lt;&#x2F;code&gt; —— 语言服务器的数量来看，在 LSP 出现之前，实际上并没有太多的语言服务器（或类似的东西）存在。主要原因在于构建一个语言服务器太难了。&lt;&#x2F;p&gt;
+&lt;p&gt;语言服务器的本质复杂性相当高。众所周知，编译器的构建是复杂的，而语言服务器不仅仅是一个编译器。&lt;&#x2F;p&gt;
+&lt;p&gt;首先：语言服务器必须和传统编译器一样，彻底理解编程语言，能够区分编写正确和编写错误的程序。然而，对于错误的程序，传统编译器只需抛出错误信息，而语言服务器则必须尽可能地分析任何错误的程序。与传统编译器相比，在处理不完整或错误的程序方面，语言服务器面临的首个复杂挑战是它必须持续运行并尝试理解这些代码。&lt;&#x2F;p&gt;
+&lt;p&gt;其次：虽然可以把传统编译器看作成一个将源代码文本转换成机器代码的纯函数，但语言服务器需要处理一个用户不断进行修改的代码库。这实际上为编译器引入了时间维度，状态随时间的变化是编程中最为棘手的挑战之一。&lt;&#x2F;p&gt;
+&lt;p&gt;然后：传统编译器旨在最大化吞吐量，而语言服务器的目标则是尽可能减少延迟（同时不完全牺牲吞吐量）。延迟要求并不意味着需要更加努力地优化。相反，这意味着通常需要从根本上改变架构，才能拥有可接受的延迟。&lt;&#x2F;p&gt;
+&lt;p&gt;这就引出了关于语言服务器的一系列意外的复杂性问题。如何编写传统编译器是众所周知的，已成为常识。虽然并不是每个人都读过龙书（我自己就没完全读懂 Parsing 章节），但人们都知道该书包含了所有答案。因此，大多数现有的编译器看起来都像是典型的编译器。当编译器作者开始考虑 IDE 支持时，第一个想法往往是 「啊，IDE 在某种程度上就像是一个编译器，我们已经有了一个编译器，所以问题解决了，对吧？」。这种想法是大错特错的 —— 内部来看，IDE 与编译器有很大的不同，但直到近几年，这还并非人所共知。&lt;&#x2F;p&gt;
+&lt;p&gt;语言服务器是「&lt;a href=&quot;https:&#x2F;&#x2F;www.joelonsoftware.com&#x2F;2000&#x2F;04&#x2F;06&#x2F;things-you-should-never-do-part-i&#x2F;&quot;&gt;永不重写&lt;&#x2F;a&gt;」规则的反例。大多数备受好评的语言服务器都是该语言编译器的重写或重新实现。&lt;&#x2F;p&gt;
+&lt;p&gt;IntelliJ 和 Eclipse 选择编写自己的编译器而不是在 IDE 内部复用 javac。为了提供足够的 C# IDE 支持，微软将其用 C++ 编写的批处理编译器重写为一个交互式的自托管编译器（项目 Roslyn）。Dart 尽管是一种从零开始的相对现代的语言，最终也有了三种实现（AOT 编译器、IDE 编译器 dart-analyzer、设备端的 JIT 编译器）。Rust 尝试了两种不同的方法：一种是对其编译器 rustc 进行逐步改进（RLS），另一种是完全从头开始构建一个新的实现，即 rust-analyzer，很明显后者更胜一筹。&lt;&#x2F;p&gt;
+&lt;p&gt;我知道的两个例外是 C++ 和 OCaml。有趣的是，这两种语言都需要预先声明和头文件，我认为这并不是巧合。有关详细信息，参见 &lt;a href=&quot;https:&#x2F;&#x2F;rust-analyzer.github.io&#x2F;blog&#x2F;2020&#x2F;07&#x2F;20&#x2F;three-architectures-for-responsive-ide.html&quot;&gt;Three Architectures for a Responsive IDE&lt;&#x2F;a&gt; 一文。&lt;&#x2F;p&gt;
+&lt;p&gt;总之，在语言服务器方面，事情处于一种不良的均衡状态。实现语言服务器是完全可能的，但这需要一种反传统的方法，而成为一名开拓性的反传统者是困难的。&lt;&#x2F;p&gt;
+&lt;p&gt;在编辑器方面，我不太清楚情况如何。但是，我想要表达的是没有目前任何编辑器能够充分担任 IDE 的角色。&lt;&#x2F;p&gt;
+&lt;p&gt;IDE 的体验包含了一系列语义化功能支持。当然，最显著的例子是代码补全。如果有人想为 VSCode 实现定制的代码补全功能，他们需要实现 &lt;code&gt;CompletionItemProvider&lt;&#x2F;code&gt; 接口：&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;typescript&quot; class=&quot;language-typescript &quot;&gt;&lt;code class=&quot;language-typescript&quot; data-lang=&quot;typescript&quot;&gt;interface CompletionItemProvider {
+    provideCompletionItems(
+        document: TextDocument,
+        position: Position,
+    ): CompletionItem[]
+}
+&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;这表明，在 VSCode 中，（代码）自动补全（以及其他许多 IDE 相关的功能）被视为编辑器的一等公民，拥有统一的用户界面和开发者 API。&lt;&#x2F;p&gt;
+&lt;p&gt;相比之下，Emacs 和 Vim 就很不一样了。它们并没有将自动补全直接作为编辑器功能的 API 接口。相反，这些编辑器提供了底层的光标和屏幕操作接口，开发者依托这些接口，各自开发出了竞争性的自动补全功能！&lt;&#x2F;p&gt;
+&lt;p&gt;这只是冰山一角！参数信息（parameter info）、内嵌提示（inlay hints）、导航路径（breadcrumbs）、扩展选择（extend selection）、辅助工具（assists）、符号搜索（symbol search）、引用查找（symbol search）呢？这甚至还没有概括全。&lt;&#x2F;p&gt;
+&lt;p&gt;简洁地总结上述内容，提供良好 IDE 支持的问题不是 &lt;code&gt;N * M&lt;&#x2F;code&gt; 的问题，而是双边市场失衡的问题。&lt;&#x2F;p&gt;
+&lt;p&gt;语言供应商不愿意开发语言服务器，原因在于这既费力又缺乏市场需求（= 没有来自其它语言的竞争压力），而且，即使某人真的开发出了语言服务器，也会发现很多编辑器根本没有准备好承载这样一个高级功能的语言服务器。&lt;&#x2F;p&gt;
+&lt;p&gt;在编辑器方面，因为缺少提供这些 API 的服务方，所以增加对 IDE 所需高级 API 的支持并没有太大的动力。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;wei-shi-yao-lsp-hen-hao&quot;&gt;为什么 LSP 很好&lt;&#x2F;h2&gt;
+&lt;p&gt;我认为 LSP 非常好！我不认为它是一个巨大的技术创新（将语言无关的编辑器和语言服务器分离是显而易见的）。我认为它的技术实现相当糟糕（或者说「一般」），但它使我们的世界发生了变化，从一个将缺少语言配套 IDE 视为常态的时代，转变为一个没有自动补全和跳转定义功能的语言看起来就不太专业的时代。&lt;&#x2F;p&gt;
+&lt;p&gt;值得注意的是，双边市场失衡问题是由微软解决的，他们既是语言（C# 和 TypeScript）的供应商，也是编辑器（VSCode 和 Visual Studio）的供应商，而且在 IDE 领域通常都输给了竞争对手（JetBrains）。尽管我可能会对 LSP 的某些技术细节发牢骚，但我绝对佩服他们在这一领域的战略视野。他们：&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;利用 Web 技术上构建了一个代码编辑器。&lt;&#x2F;li&gt;
+&lt;li&gt;确定了网页内编辑是 JetBrains 挣扎的一个大领域（想让 Jetbrains 系 IDE 在 JavaScript 里运行几乎不可能）。&lt;&#x2F;li&gt;
+&lt;li&gt;构建了一种语言（！！！！）以使提供网页编辑的 IDE 支持变为可能。&lt;&#x2F;li&gt;
+&lt;li&gt;构建了一个架构极具前瞻性的IDE平台（敬请期待我后续详细解释 vscode.d.ts 文件为何是一个技术精湛的范例）。&lt;&#x2F;li&gt;
+&lt;li&gt;推出 LSP 的目的是为了免费地提升其平台在其他领域的价值，间接地将整个世界带向一个更加优秀的 IDE 环境。&lt;&#x2F;li&gt;
+&lt;li&gt;随着 CodeSpaces 的推出，如果我们真的转向不在本地机器上编辑、构建和运行代码的「远程优先开发」，那么它有望成为这一模式下的领头玩家。&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;不过，公平地说，我仍然希望最终的赢家会是 JetBrains，他们认为 Kotlin 是任何平台的通用语言的想法 :-) 虽然微软充分利用了当今占主导地位的更糟糕的技术（TypeScript 和 Electron），JetBrains 试图从底层修正问题（Kotlin 与 Compose UI Framework）。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;m-n-shuo-ming-de-geng-duo-fan-bo&quot;&gt;M * N 说明的更多反驳&lt;&#x2F;h2&gt;
+&lt;p&gt;现在，我要深入强调一下，这真的不是 &lt;code&gt;M * N&lt;&#x2F;code&gt; 的问题。 :)&lt;&#x2F;p&gt;
+&lt;p&gt;第一：&lt;code&gt;M * N&lt;&#x2F;code&gt; 的论点忽视了一个事实，那就是这是一个极其容易并行处理的问题。并不需要每个语言的设计者都去为所有编辑器编写插件，也不需要每个编辑器都去特别支持所有语言。相反，一种语言应当实现一个服务器，使用某种协议通信；编辑器需要实现与语言无关的 API，以提供自动补全等功能；如果该语言和编辑器都不是非常小众，那么对这两者都感兴趣的人就会编写一些连接二者的胶水代码。以 rust-analyzer 的 VSCode 插件为例，它的代码量大概是 3200 行，NeoVim 插件是 2300 行，Emacs 插件是 1200 行。这三个插件都是由不同的人独立开发的。这正是去中心化的开源开发最精彩的地方！如果插件要支持自定义协议而不是 LSP（前提是编辑器支持高级 IDE API），我预计也许需要增加大约 2000 行代码，这仍然完全在业余爱好者的可接受范围之内。&lt;&#x2F;p&gt;
+&lt;p&gt;第二：对于 &lt;code&gt;M * N&lt;&#x2F;code&gt; 优化而言，你可能期待协议实现能够由某种机器可读形式自动生成。然而，在最新的发布之前，LSP 规范的权威来源仅仅是一个非正式的 Markdown 文件。每种语言和客户端都必须自行找出从中提取协议的方法，许多人（包括 rust-analyzer）实际上是通过手动同步变更来进行的，这导致了相当多的重复工作。&lt;&#x2F;p&gt;
+&lt;p&gt;第三：如果 &lt;code&gt;M * N&lt;&#x2F;code&gt; 真的导致了问题，那么理应只有一个 LSP 实现被所有编辑器采用。但实际情况却是，在 Emacs 中存在两种互相竞争的实现：lsp-mode 和 eglot。更令人惊讶的是，截至目前，rust-analyzer 的使用手册中甚至包括了如何将其与六种（没错，是六种）不同的 vim LSP 客户端进行集成的指南。这再次证明了开源社区的特点：总体工作量几乎不是问题，真正关键的是完成工作所需的协调努力。&lt;&#x2F;p&gt;
+&lt;p&gt;第四：连微软自身也未尝试从 &lt;code&gt;M + N&lt;&#x2F;code&gt; 的情况中获益。 VSCode 并没有采用一种通用的 LSP 实现方式；相反，它要求每种语言都有其专属的插件，这些插件各自独立实现了 LSP。&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;wo-de-hu-xu&quot;&gt;我的呼吁&lt;&#x2F;h2&gt;
+&lt;h3 id=&quot;suo-you-ren&quot;&gt;所有人&lt;&#x2F;h3&gt;
+&lt;p&gt;向上游请求获得更好的 IDE 支持。虽然基础 IDE 支持已经普及，但我们还有很多可以提升的空间。在理想状态下，我们应该能够利用简单的 API，深入了解编辑器光标处的每一个表达式的语义细节，就像我们今天能够轻松查看编辑器缓冲区的内容一样。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;bian-ji-qi-kai-fa-zhe&quot;&gt;编辑器开发者&lt;&#x2F;h3&gt;
+&lt;p&gt;请关注 VSCode 的架构设计。虽然 Electron 带来的用户体验有待商榷，但其内部架构却蕴含着深刻的见解。编辑器 API 应该围绕着与表现形式无关的高级特性来设计。基本的 IDE 功能应当成为易于扩展的一级功能，而不是每个插件作者都需要重新发明的轮子。尤其是辅助功能、代码操作和高亮提示应该被当作核心的用户体验元素。这代表了 IDE 界的一个重大的用户体验创新，虽然这个想法已经不新鲜，但让它成为所有编辑器界面的标准配置是非常必要的。&lt;&#x2F;p&gt;
+&lt;p&gt;但不要把 LSP 作为一级概念。尽管这可能听起来有些出乎意料，但 VSCode 实际上并不直接处理 LSP。它仅提供了一系列接口，而不关心这些接口是如何实现的。比如在实际运行中，VSCode 中的 Rust 和 C++ 扩展并不会共用一套 LSP 实现，而是各自在内存中保留了独立的 LSP 库副本！&lt;&#x2F;p&gt;
+&lt;p&gt;我们还应该充分利用开源社区的力量，避免将所有 LSP 实现集中管理。应鼓励不同的开发团队独立地优化编辑器对于 Go、Rust 等语言的支持。VSCode 已经展示了一种可能的路径，通过其市场和一个去中心化、独立插件的体系。然而，理论上，如果各种编程语言都有各自的独立维护者团队，那么采用单一共享的代码仓库或源代码树的工作模式也是可行的。&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;yu-yan-fu-wu-qi-kai-fa-zhe&quot;&gt;语言服务器开发者&lt;&#x2F;h3&gt;
+&lt;p&gt;你们的成就令人赞叹！各种语言的 IDE 支持正以前所未有的速度提高，虽然这只是一个长期旅程的开端。有一点需要特别强调，那就是 LSP 是访问语言语义信息的一种方式，但它并不是唯一的方式。随着时间的推移，可能会出现更加优秀的替代技术。即使在当前，LSP 的限制也已经成为了一些实用功能实现的障碍。因此，我们应该将 LSP 看作是一种数据传输格式，而不是语言处理的内核模型，并且我们迫切需要更多关于如何开发语言服务器的深入讨论 —— 目前这方面的资源还远远不够。&lt;&#x2F;p&gt;
+&lt;p&gt;以上。&lt;&#x2F;p&gt;
+&lt;p&gt;作者附言：如果您恰好从使用 rust-analyzer 中获益，请考虑赞助 &lt;a href=&quot;https:&#x2F;&#x2F;opencollective.com&#x2F;rust-analyzer&quot;&gt;Ferrous Systems Open Source Collective&lt;&#x2F;a&gt; 以支持 rust-analyzer 的开发！&lt;&#x2F;p&gt;
+</content>
+	</entry>
+	<entry xml:lang="zh-cn">
+		<title>重启</title>
+		<published>0000-04-02T00:00:00+00:00</published>
+		<updated>0000-04-02T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://kirraobj.github.io/refresh/" type="text/html"/>
+		<id>https://kirraobj.github.io/refresh/</id>
+		<content type="html">&lt;p&gt;更换了 &lt;code&gt;Zola&lt;&#x2F;code&gt; 的主题，把以前的文章全部删了。本来想换成 &lt;code&gt;Typst&lt;&#x2F;code&gt;，但是感觉对于科学写作的需求不是太强。加上有一点性能上的小问题。&lt;&#x2F;p&gt;
+&lt;p&gt;希望自己能坚持下去。&lt;&#x2F;p&gt;
+</content>
+	</entry>
+</feed>

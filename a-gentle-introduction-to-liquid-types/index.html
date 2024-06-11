@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="https://kirraobj.github.io/atom.xml">
+    
+    
+    
+        
+    
+    
+    
+    
+    
+    
+        
+    
+    
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
+    <title>[译] 简要介绍 Liquid Types - id :: k -&gt; k</title>
+    <meta charset="utf-8">
+    <meta name="title" content="[译] 简要介绍 Liquid Types - id :: k -&gt; k">
+    <meta name="description" content="">
+    <meta property="og:image:width" content="200" />
+    <meta property="og:image:height" content="200" />
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;kirraobj.github.io/style.css">
+    
+    <link rel="stylesheet" href="https:&#x2F;&#x2F;kirraobj.github.io/autodarkmode.css">
+    
+    
+    <style>
+    @media screen and (min-width: 320px) {
+        body {
+            font-size: calc(16px + 2 * ((100vw - 320px) / 960));
+        }
+    }
+    </style>
+    
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap">
+    <style>body { font-family: 'Source Serif Pro', 'Source Han Serif SC', 'Noto Serif CJK SC', 'Noto Serif SC', serif }</style>
+    
+    <link rel="stylesheet" href="/foundation.min.css">
+    <script src="/highlight.min.js"></script>
+    <script defer>hljs.highlightAll();</script>
+</head>
+<body>
+    
+    <header class="header">
+        <div class="blog-title"><a href="https:&#x2F;&#x2F;kirraobj.github.io" class="logo">id :: k -&gt; k</a></div>
+        <nav class="navbar">
+    <ul class="menu">
+        
+        
+        <li class="menu-item">
+            
+            
+            
+            
+            <a href="https:&#x2F;&#x2F;kirraobj.github.io&#x2F;" class="menu-item-link">主页</a>
+            
+        </li>
+        
+        <li class="menu-item">
+            
+            
+            
+            
+            <a href="https:&#x2F;&#x2F;kirraobj.github.io&#x2F;archives" class="menu-item-link">归档</a>
+            
+        </li>
+        
+        <li class="menu-item">
+            
+            
+            
+            
+            <a href="https:&#x2F;&#x2F;kirraobj.github.io&#x2F;about" class="menu-item-link">关于</a>
+            
+        </li>
+        
+        <li class="menu-item">
+            
+            
+            
+            
+            <a href="https:&#x2F;&#x2F;kirraobj.github.io&#x2F;atom.xml" class="menu-item-link">订阅</a>
+            
+        </li>
+        
+    </ul>
+</nav>
+
+    </header>
+    
+    <main class="main">
+        
+<article class="post">
+    <div class="post-title">
+        <h1 class="title">[译] 简要介绍 Liquid Types</h1>
+    </div>
+    <div class="post-content">
+        <blockquote>
+<p><a href="https://goto.ucsd.edu/~ucsdpl-blog/liquidtypes/2015/09/19/liquid-types/">原文</a>由 UCSD The Programming Systems Group 发表。</p>
+</blockquote>
+<p>类型系统已成功用于编译时期捕捉到潜在的错误，比如我们无法用 Boolean 除以 Int。然而，即使是没有类型错误的程序也可能出错，比如将 Int 除以零通常会抛出一个运行时异常。</p>
+<p>Liquid Types 通过引入逻辑谓词（Logical Predicates）扩展现有的类型系统，使我们能够指定并自动验证代码的语义属性（Semantic Properties）。</p>
+<h1 id="jie-gou-vs-yu-yi-shu-xing">结构 vs. 语义属性</h1>
+<p>大多数类型系统依赖于其值的结构进行推理。Int 和 Boolean 具有不同的结构，通常在内部表示方式上有所不同，并且可以使用不同的操作集：即 Int 可以进行除法运算，而 Boolean 可以进行合取运算（Conjuncted）。</p>
+<p>结构之外，值还具有语义属性。Liquid Types 通过逻辑谓词扩展了现有的类型系统，使我们能够指定值的语义属性。例如，Int 类型可以通过逻辑谓词来描述非零的整数：</p>
+<pre data-lang="haskell" class="language-haskell "><code class="language-haskell" data-lang="haskell">{v : Int | v &#x2F;= 0}
+</code></pre>
+<p>或者用来描述自然数（Natural Numbers）：</p>
+<pre data-lang="haskell" class="language-haskell "><code class="language-haskell" data-lang="haskell">{v : Int | v &gt;= 0}
+</code></pre>
+<p>由于 Liquid Types 能够描述值的语义，使我们可以静态地捕捉语义类型错误，例如上面阐述的除零案例。</p>
+<h1 id="tong-guo-lei-xing-gui-fan-fang-zhi-chu-ling-cuo-wu">通过类型规范防止除零错误</h1>
+<p>一个除法操作符的类型签名，给定两个 Int，得到另一个 Int。</p>
+<pre data-lang="haskell" class="language-haskell "><code class="language-haskell" data-lang="haskell">div :: Int -&gt; Int -&gt; Int
+</code></pre>
+<p>该类型签名有效地规定了操作符的结构。如果我们的程序可以编译，所有传给 <code>div</code> 的参数都是 Int，而不可能是 Boolean。</p>
+<p>使用 Liquid Types，我们可以精炼（Refine）类型签名来描述操作符的语义属性，特别是除数不应该为零。</p>
+<pre data-lang="haskell" class="language-haskell "><code class="language-haskell" data-lang="haskell">div :: Int -&gt; {v : Int | v &#x2F;= 0} -&gt; Int
+</code></pre>
+<p>上述类型为 <code>div</code> 操作符进行了规范。如果程序通过了上述类型检查，编译器在编译时就会验证 <code>div</code> 的第二个参数是否不同于零，从而防止除零运行时异常。接下来我们看看这个验证是如何进行的。</p>
+<h1 id="gui-fan-yan-zheng">规范验证</h1>
+<p>验证是给定代码和一些规范（这里是以类型签名的形式）的过程，决定代码是否满足这些规范。</p>
+<p>考虑 <code>div</code> 操作符的三种求值情况：<code>good</code>、<code>bad</code> 和 <code>impr (Imprecise)</code>：</p>
+<pre data-lang="haskell" class="language-haskell "><code class="language-haskell" data-lang="haskell">good = div 42 one  -- OK
+bad  = div 42 zero -- 类型错误
+impr = div 42 nat  -- 类型错误
+
+one  :: { v : Int | 0 &lt; v  }
+one  = 1
+
+zero :: { v : Int | 0 == v }
+zero = 0
+
+nat  :: { v : Int | 0 &lt;= v }
+nat  = 42
+</code></pre>
+<p>验证将决定只有 <code>good</code> 是正确求值了 <code>div</code>，过程如下。</p>
+<p>首先，它触发子类型查询。<code>t1</code> 是 <code>t2</code> 的子类型，如果每个具有 <code>t1</code> 类型的表达式也具有 <code>t2</code> 类型，则记做 <code>t1 &lt;: t2</code>。</p>
+<p>在我们的例子中，子类型查询将检查在每次求值 <code>div</code> 时，除数的类型是否是规范中第二个参数的子类型，即 <code>{v : Int | v /= 0}</code>。例如，<code>good</code> 将触发以下子类型查询：</p>
+<pre data-lang="haskell" class="language-haskell "><code class="language-haskell" data-lang="haskell">{v : Int | 0 &lt; v} &lt;: {v : Int | 0 &#x2F;= v}
+</code></pre>
+<p>然后，通过蕴涵检查（Implication checking）解决子类型查询。如果 <code>p ⟹ q</code> 则 <code>{v : Int | p } &lt;: {v : Int | q }</code> 成立，例如：</p>
+<pre data-lang="haskell" class="language-haskell "><code class="language-haskell" data-lang="haskell">{v : Int | 0 &lt; v} &lt;: {v : Int | 0 &#x2F;= v}
+</code></pre>
+<p>等价于</p>
+<pre data-lang="haskell" class="language-haskell "><code class="language-haskell" data-lang="haskell">∀ v. 0 &lt; v ⟹ 0 ≠ v
+</code></pre>
+<p>因此 <code>good</code> 的验证成功，因为 <code>0 &lt; v ⟹ 0 ≠ v</code>，但 <code>bad</code> 和 <code>impr</code> 的验证失败，因为 <code>0 = v ⟹ 0 ≠ v</code> 和 <code>0 ≤ v ⟹ 0 ≠ v</code> 都不成立。</p>
+<p>请注意，类型为你的程序提供了一种抽象。当我们定义 <code>nat</code> 时，我们将值 42 抽象为一个自然数，即 <code>nat :: {v : Int | 0 &lt;= v}</code>。这对于 42 来说是一个正确的规范，但不够精确，因为它忽略了 42 不是 0 的信息，因此 42 是一个好的除数。简而言之，我们的分析并不完全，因为它可能会产生并非真正错误的类型错误。好的一面是，我们的分析是可靠的，如果它说 OK，就一定不会违反规范。</p>
+<h1 id="yan-shen-yue-du">延伸阅读</h1>
+<p>2008 年，Rondon、Kawaguchi 和 Jhala 在 UCSD 的 ProgSys 小组<a href="https://goto.ucsd.edu/~rjhala/liquid/liquid_types.pdf">引入了</a> Liquid Types（Logically Qualified Data Types）。从那时起，它们已被用于规范和验证 ML、C 和 Haskell。</p>
+<p>Liquid Types 是依值类型（Dependent Types），即类型依赖于任意表达式，类似于我们在 Coq、Agda 等中看到的类型。</p>
+<p>Liquid Types 是精炼类型（Refinement Types），即在基本类型的基础上，通过逻辑谓词进一步限定的类型。这些逻辑谓词不能是任意的表达式（如依值类型），而是从一个<a href="https://en.wikipedia.org/wiki/Sublanguage">子语言</a> （Sub-Language）中抽取的表达式。精炼类型系统的例子包括 DML、Sage 和 F* 等。</p>
+<p>Liquid Types 是一种受约束的精炼类型，其中的逻辑谓词来自一个具有可判定性的子语言，即一个可以进行蕴含检查的逻辑语言。例子包括无量词理论，如整数线性算术（Linear Arithmetic over Integers）、数组理论（Theory of Arrays）和集合论（Sets Theory）等。这些理论的一个共同特点是它们允许我们通过算法来确定逻辑表达式的真值，从而实现自动化的类型验证。</p>
+<p>由于我们使用的约束是具有可判定性的（Decidable），我们可以可靠地使用 SMT-Solvers 来进行蕴含检查。这意味着，类型检查可以简化为蕴含检查，从而使得 Liquid Types 允许可判定性的类型检查和类型推断。</p>
+<p>另一方面，可判定性的约束在语法上对规范语言产生了限制。使用可判定性逻辑究竟能表示哪些规范，这仍然是一个开放的问题。然而，通过使用抽象（Abstract）或有界精炼类型（Bounded Refinement Types）等技巧，我们可以在仅使用可判定性逻辑的情况下表达复杂的语义属性。</p>
+<h1 id="zong-er-yan-zhi">总而言之</h1>
+<p>Liquid Types 提供了一种通过受约束的依值类型来规范和自动验证代码语义属性的方法。它们使用一种具有可判定性的逻辑子语言来描述这些约束条件，从而实现了一个高度自动化的类型系统，并且减少了对显式类型注释的需求。</p>
+
+    </div>
+    <div class="post-meta">
+        <span class="post-time">
+        
+            
+
+
+二〇二四年六月二日
+
+        
+        </span>
+    </div>
+</article>
+
+<div class="prev_next">
+<nav id="prev_next">
+    <div class="prev">
+        
+    </div>
+    <div class="next">
+        
+    </div>
+</nav>
+</div>
+
+<div class="post-comment">
+
+
+
+
+</div>
+
+    </main>
+    
+    <p class="license"></p>
+    
+</body>
+</html>
